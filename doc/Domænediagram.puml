@@ -1,0 +1,151 @@
+@startuml FitnessDomainModel
+
+
+title Fitness Program — Domænemodel
+
+class Bruger {
+  + brugerId : UUID
+  + navn : String
+  + email : String
+  + oprettetDato : Date
+}
+
+class BrugerProfil {
+  + alder : Int
+  + køn : Enum {Mand, Kvinde, Andet}
+  + højdeCm : Float
+  + vægtKg : Float
+  + erfaringsNiveau : Enum {Begynder, Øvet, Avanceret}
+  + skaderNotes : String
+}
+
+class FitnessMål {
+  + målType : Enum {TagePå, TabeSig, Vedligeholde, Rekomp}
+  + målvægtKg : Float
+  + startVægtKg : Float
+  + deadlineDato : Date
+  + ugentligVægtÆndringKg : Float
+}
+
+class TræningsPræference {
+  + ønskerStyrke : Boolean
+  + ønskerCardio : Boolean
+  + ønskerHIIT : Boolean
+  + programFokus : Enum {AlmenLivsstil, Bodybuilding, SpecielSport, Andet}
+  + sportSpecifikation : String
+  + træningsDagePerUge : Int
+  + sessionVarighedMin : Int
+}
+
+class FitnessProgram {
+  + programId : UUID
+  + oprettetDato : Date
+  + status : Enum {Aktiv, Afsluttet, Pauseret}
+  + varighed : Int
+}
+
+class MacroPlan {
+  + kalorieMål : Int
+  + proteinGram : Int
+  + kulhydratGram : Int
+  + fedtGram : Int
+  + beregningsMetode : String
+  + justeringsFaktor : Float
+}
+
+class TræningsPlan {
+  + planId : UUID
+  + navn : String
+  + ugentligStruktur : String
+  + skadesHensyn : String[]
+}
+
+class TræningsUge {
+  + ugeNummer : Int
+  + startDato : Date
+  + slutDato : Date
+  + status : Enum {Planlagt, Aktiv, Gennemført}
+}
+
+class TræningsDag {
+  + dagNummer : Int
+  + dagNavn : String
+  + fokus : Enum {Push, Pull, Ben, FullBody, Cardio, Hvile}
+  + estimeredVarighed : Int
+}
+
+class ØvelseKatalog <<ExternalAPI>> {
+  + hentØvelserEfterNiveau()
+  + hentØvelserEfterMuskelgruppe()
+  + filtrerEfterSkader()
+  + hentAlternativeØvelser()
+}
+
+class Øvelse {
+  + øvelseId : UUID
+  + navn : String
+  + muskelgruppe : String[]
+  + udstyr : String
+  + erfaringsNiveau : Enum
+  + skadevenlig : Boolean
+  + videoUrl : String
+}
+
+class ProgramØvelse {
+  + sæt : Int
+  + reps : String
+  + hviletidSek : Int
+  + progressionNote : String
+  + alternativØvelse : String
+}
+
+class UgentligWeighIn {
+  + weighInId : UUID
+  + dato : Date
+  + vægtKg : Float
+  + ugeNummer : Int
+  + noter : String
+}
+
+class VægtFremskridt {
+  + totalÆndringKg : Float
+  + procentFærdig : Float
+  + gennemsnitsÆndringPerUge : Float
+  + estimeredFærdigDato : Date
+  + påRetteSporBoolean : Boolean
+}
+
+class MacroJustering {
+  + justeringsDato : Date
+  + gamleKalorier : Int
+  + nyeKalorier : Int
+  + årsag : String
+  + anbefaling : String
+}
+
+Bruger *-- BrugerProfil : har
+Bruger *-- FitnessMål : sætter
+Bruger *-- TræningsPræference : specificerer
+Bruger -- FitnessProgram : deltager i
+
+FitnessMål --> FitnessProgram : driver
+TræningsPræference --> FitnessProgram : former
+
+FitnessProgram *-- MacroPlan : indeholder
+FitnessProgram *-- TræningsPlan : indeholder
+FitnessProgram *-- UgentligWeighIn : sporer
+
+TræningsPlan *-- TræningsUge : består af
+TræningsUge *-- TræningsDag : indeholder
+
+TræningsDag *-- ProgramØvelse : har
+ProgramØvelse --> Øvelse : refererer til
+
+ØvelseKatalog ..> Øvelse : henter <<API>>
+BrugerProfil ..> ØvelseKatalog : filtrerer på erfaringsniveau og skader
+
+UgentligWeighIn --> VægtFremskridt : beregner
+VægtFremskridt ..> MacroJustering : hvis afvigelse
+MacroJustering --> MacroPlan : opdaterer
+
+@enduml

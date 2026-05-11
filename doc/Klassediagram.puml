@@ -1,0 +1,150 @@
+@startuml FitnessDomainModel
+'LAV DEN HER PÅ ENGELSK
+title Fitness Program — Domain Model
+
+class User {
+  + userId : UUID
+  + name : String
+  + email : String
+  + createdDate : Date
+}
+
+class UserProfile {
+  + age : Int
+  + gender : Enum {Male, Female, Other}
+  + heightCm : Float
+  + weightKg : Float
+  + experienceLevel : Enum {Beginner, Intermediate, Advanced}
+  + injuryNotes : String
+}
+
+class FitnessGoal {
+  + goalType : Enum {BulkUp, LoseWeight, Maintain, Recomp}
+  + targetWeightKg : Float
+  + startWeightKg : Float
+  + deadlineDate : Date
+  + weeklyWeightChangeKg : Float
+}
+
+class TrainingPreference {
+  + wantsStrength : Boolean
+  + wantsCardio : Boolean
+  + wantsHIIT : Boolean
+  + programFocus : Enum {GeneralLifestyle, Bodybuilding, SpecificSport, Other}
+  + sportSpecification : String
+  + trainingDaysPerWeek : Int
+  + sessionDurationMin : Int
+}
+
+class FitnessProgram {
+  + programId : UUID
+  + createdDate : Date
+  + status : Enum {Active, Completed, Paused}
+  + durationWeeks : Int
+}
+
+class MacroPlan {
+  + calorieGoal : Int
+  + proteinGram : Int
+  + carbohydrateGram : Int
+  + fatGram : Int
+  + calculationMethod : String
+  + adjustmentFactor : Float
+}
+
+class TrainingPlan {
+  + planId : UUID
+  + name : String
+  + weeklyStructure : String
+  + injuryConsiderations : String[]
+}
+
+class TrainingWeek {
+  + weekNumber : Int
+  + startDate : Date
+  + endDate : Date
+  + status : Enum {Planned, Active, Completed}
+}
+
+class TrainingDay {
+  + dayNumber : Int
+  + dayName : String
+  + focus : Enum {Push, Pull, Legs, FullBody, Cardio, Rest}
+  + estimatedDuration : Int
+}
+
+class ExerciseCatalog <ExternalAPI> {
+  + getExercisesByLevel()
+  + getExercisesByMuscleGroup()
+  + filterByInjuries()
+  + getAlternativeExercises()
+}
+
+class Exercise {
+  + exerciseId : UUID
+  + name : String
+  + muscleGroups : String[]
+  + equipment : String
+  + experienceLevel : Enum
+  + injuryFriendly : Boolean
+  + videoUrl : String
+}
+
+class ProgramExercise {
+  + sets : Int
+  + reps : String
+  + restTimeSec : Int
+  + progressionNote : String
+  + alternativeExercise : String
+}
+
+class WeeklyWeighIn {
+  + weighInId : UUID
+  + date : Date
+  + weightKg : Float
+  + weekNumber : Int
+  + notes : String
+}
+
+class WeightProgress {
+  + totalChangeKg : Float
+  + percentCompleted : Float
+  + averageChangePerWeek : Float
+  + estimatedCompletionDate : Date
+  + onTrack : Boolean
+}
+
+class MacroAdjustment {
+  + adjustmentDate : Date
+  + oldCalories : Int
+  + newCalories : Int
+  + reason : String
+  + recommendation : String
+}
+
+User *-- UserProfile : has
+User *-- FitnessGoal : sets
+User *-- TrainingPreference : specifies
+User -- FitnessProgram : participates in
+
+FitnessGoal --> FitnessProgram : driveS
+TrainingPreference --> FitnessProgram : shapes
+
+FitnessProgram *-- MacroPlan : contains
+FitnessProgram *-- TrainingPlan : contains
+FitnessProgram *-- WeeklyWeighIn : tracks
+
+TrainingPlan *-- TrainingWeek : consists of
+TrainingWeek *-- TrainingDay : contains
+
+TrainingDay *-- ProgramExercise : has
+ProgramExercise --> Exercise : refers to
+
+ExerciseCatalog ..> Exercise : fetches <API>
+UserProfile ..> ExerciseCatalog : filters by experience and injuries
+
+WeeklyWeighIn --> WeightProgress : calculates
+WeightProgress ..> MacroAdjustment : if deviation
+MacroAdjustment --> MacroPlan : updates
+
+@enduml
