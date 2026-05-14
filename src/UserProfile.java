@@ -1,14 +1,15 @@
 public class UserProfile {
 
-    // Enums
+    // Enum for gender
     public enum Gender {
         MALE,
-        FEMALE,
-        OTHER
+        FEMALE
     }
 
+    // Enum for experience level
     public enum ExperienceLevel {
         BEGINNER,
+        NOVICE,
         INTERMEDIATE,
         ADVANCED
     }
@@ -22,7 +23,12 @@ public class UserProfile {
     private String injuryNotes;
 
     // Constructor
-    public UserProfile(int age, Gender gender, float heightCm, float weightKg, ExperienceLevel experienceLevel, String injuryNotes) {
+    public UserProfile(int age,
+                       Gender gender,
+                       float heightCm,
+                       float weightKg,
+                       ExperienceLevel experienceLevel,
+                       String injuryNotes) {
 
         this.age = age;
         this.gender = gender;
@@ -30,6 +36,47 @@ public class UserProfile {
         this.weightKg = weightKg;
         this.experienceLevel = experienceLevel;
         this.injuryNotes = injuryNotes;
+    }
+
+    // Update stats
+    public void updateStats(int age, float heightCm, float weightKg) {
+
+        this.age = age;
+        this.heightCm = heightCm;
+        this.weightKg = weightKg;
+
+        System.out.println("Stats updated successfully.");
+    }
+
+    // Calculate BMI
+    public float calculateBMI() {
+
+        float heightMeters = heightCm / 100;
+
+        return weightKg / (heightMeters * heightMeters);
+    }
+
+    // Set experience level
+    public void setExperienceLevel(ExperienceLevel experienceLevel) {
+
+        this.experienceLevel = experienceLevel;
+
+        System.out.println("Experience level updated.");
+    }
+
+    // Add injury note
+    public void addInjuryNote(String note) {
+
+        if (injuryNotes == null || injuryNotes.isEmpty()) {
+
+            injuryNotes = note;
+
+        } else {
+
+            injuryNotes += ", " + note;
+        }
+
+        System.out.println("Injury note added.");
     }
 
     // Getters
@@ -57,33 +104,10 @@ public class UserProfile {
         return injuryNotes;
     }
 
-    // Setters
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public void setGender(Gender gender) {
-        this.gender = gender;
-    }
-
-    public void setHeightCm(float heightCm) {
-        this.heightCm = heightCm;
-    }
-
-    public void setWeightKg(float weightKg) {
-        this.weightKg = weightKg;
-    }
-
-    public void setExperienceLevel(ExperienceLevel experienceLevel) {
-        this.experienceLevel = experienceLevel;
-    }
-
-    public void setInjuryNotes(String injuryNotes) {
-        this.injuryNotes = injuryNotes;
-    }
-
+    // toString
     @Override
     public String toString() {
+
         return "UserProfile{" +
                 "age=" + age +
                 ", gender=" + gender +
