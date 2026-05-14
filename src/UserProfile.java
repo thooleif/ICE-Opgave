@@ -1,5 +1,10 @@
 public class UserProfile {
 
+
+    public void setex1() {
+
+    }
+
     // Enum for gender
     public enum Gender {
         MALE,
@@ -47,6 +52,24 @@ public class UserProfile {
 
         System.out.println("Stats updated successfully.");
     }
+
+    //SetStats for vægt osv
+    public void setWeightKg(float v) {
+        this.weightKg = v;
+    }
+
+    public void setAge(int i) {
+    this.age = i;
+    }
+
+    public void setInjuryNotes(String s) {
+    this.injuryNotes = s;
+    }
+
+    public void setHeightCm(float h) {
+    this.heightCm = h;
+    }
+
 
     // Calculate BMI
     public float calculateBMI() {
