@@ -25,22 +25,47 @@ public class User {
         this.password = password;
     }
 
-    // CSV dokumentet hvor brugere bliver gemt. fandt ud af at append gør at ting ikke bliver slettet eller overwritten
+    // CSV dokumentet hvor brugere bliver gemt
     public static void saveUsers(ArrayList<User> users) {
 
         try (FileWriter writer = new FileWriter("Data/Users.csv", true)) {
 
             for (User user : users) {
 
-                writer.write(user.getId() + ";" + user.getUsername() + ";" + user.getPassword() + "\n");
+                writer.write(
+                        user.getId() + ";" +
+                                user.getUsername() + ";" +
+                                user.getPassword() + "\n"
+                );
             }
 
         } catch (IOException e) {
+
             System.out.println("Error! File can't be written to");
         }
     }
 
-    // Login metode skal måske flyttes
+    // Register metode
+    public void register(ArrayList<User> users) {
+
+        // Tjek om brugernavn allerede findes
+        for (User user : users) {
+
+            if (user.getUsername().equalsIgnoreCase(this.username)) {
+
+                System.out.println("Username already exists!");
+                return;
+            }
+        }
+
+
+        users.add(this);
+        saveUsers(users);
+
+        System.out.println("User registered successfully!");
+    }
+
+    // Login metode
     public static boolean login(ArrayList<User> users,
                                 String username,
                                 String password) {
@@ -57,7 +82,6 @@ public class User {
         return false;
     }
 
-
     public UUID getId() {
         return id;
     }
@@ -73,6 +97,7 @@ public class User {
     @Override
     public String toString() {
 
-        return "ID: " + id + " Use";
+        return "ID: " + id +
+                " Username: " + username;
     }
 }
