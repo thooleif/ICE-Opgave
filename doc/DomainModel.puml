@@ -7,7 +7,7 @@ class Bruger {
   + brugerId : UUID
   + navn : String
   + email : String
-  + oprettetDato : Date
+
 }
 
 class BrugerProfil {
