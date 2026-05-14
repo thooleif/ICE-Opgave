@@ -66,11 +66,16 @@ public class FitnessGoal {
         }
 
         return false;
+
+
+
     }
 
 
     public GoalType getGoalType() {
         return goalType;
+
+
     }
 
     public float getTargetWeightKg() {

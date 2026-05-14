@@ -18,6 +18,9 @@ public class Menu {
     private static final String USERS_FILE = "Data/Users.csv";
     private static final String STATS_FILE = "Data/UserStats.csv";
 
+
+
+
     public Menu() {
         scanner = new Scanner(System.in);
         users = new ArrayList<>();
@@ -46,6 +49,7 @@ public class Menu {
 
             File statsFile = new File(STATS_FILE);
             if (!statsFile.exists()) {
+
                 statsFile.createNewFile();
             }
         } catch (IOException e) {
@@ -134,6 +138,9 @@ public class Menu {
                                     userProfile.getExperienceLevel() + ";" +
                                     userProfile.getInjuryNotes() + "\n"
                     );
+
+
+
                     foundUser = true;
                 } else {
                     sb.append(line).append("\n");
@@ -143,6 +150,9 @@ public class Menu {
             System.out.println("Error reading profile: " + e.getMessage());
             return;
         }
+
+
+
 
         // Hvis brugeren ikke fandtes i filen, så tilføj linjen til sidst
         if (!foundUser) {
@@ -156,10 +166,12 @@ public class Menu {
                             userProfile.getInjuryNotes() + "\n"
             );
         }
-
+//
         // Trin 2: Skriv hele filen tilbage (efter reader er lukket)
         try (FileWriter writer = new FileWriter(STATS_FILE, false)) {
             writer.write(sb.toString());
+
+
         } catch (IOException e) {
             System.out.println("Error updating profile: " + e.getMessage());
         }
@@ -181,6 +193,9 @@ public class Menu {
                     String injuries = parts.length > 6 ? parts[6] : "";
                     userProfile = new UserProfile(age, gender, height, weight, level, injuries);
                     return true;
+
+
+
                 }
             }
         } catch (IOException e) {
@@ -188,6 +203,13 @@ public class Menu {
         }
         return false;
     }
+
+
+
+
+
+
+
 
 
     // Første menu brugeren ser når programmet startes
@@ -201,6 +223,8 @@ public class Menu {
             System.out.println("3. Exit");
             System.out.print("Choose: ");
 
+
+
             int choice = readInt();
             if (choice == 1) {
                 login();
@@ -208,6 +232,8 @@ public class Menu {
                 register();
             } else if (choice == 3) {
                 System.out.println("Goodbye!");
+
+
                 running = false;
             } else {
                 System.out.println("Invalid choice, try again.");
@@ -224,6 +250,8 @@ public class Menu {
         System.out.print("Username: ");
         String username = scanner.nextLine();
 
+
+
         System.out.print("Password: ");
         String password = scanner.nextLine();
 
@@ -235,6 +263,8 @@ public class Menu {
 
             // Hvis brugeren ikke har en profil endnu, tving dem til at lave en før hovedmenuen
             if (!hasProfile) {
+
+
                 System.out.println("Your stats have not been inputted yet. Let's do it now");
                 createProfile();
             } else {
@@ -250,16 +280,22 @@ public class Menu {
     // Opretter en ny bruger og gemmer den i CSV-filen via User.saveUsers()
     private void register() {
         System.out.print("Choose a username: ");
+
         String username = scanner.nextLine();
+
 
         System.out.print("Choose a password: ");
         String password = scanner.nextLine();
+
+
 
         for (User user : users) {
             if (user.getUsername().equalsIgnoreCase(username)) {
                 System.out.println("Username already taken, try another.");
                 return;
             }
+
+
         }
 
         User newUser = new User(username, password);
@@ -278,7 +314,10 @@ public class Menu {
     private void mainMenu() {
         boolean running = true;
         while (running) {
+
             System.out.println("\n=== Main Menu ===");
+
+
             System.out.println("1. View profile");
             System.out.println("2. Update stats");
             System.out.println("3. Logout");
@@ -287,6 +326,8 @@ public class Menu {
             int choice = readInt();
             if (choice == 1) {
                 viewProfile();
+
+
             } else if (choice == 2) {
                 updateStats();
             } else if (choice == 3) {
@@ -297,6 +338,8 @@ public class Menu {
             } else {
                 System.out.println("Invalid choice, try again.");
             }
+
+
         }
     }
 
@@ -314,6 +357,8 @@ public class Menu {
         if (genderChoice == 1) {
             gender = UserProfile.Gender.MALE;
         } else {
+
+
             gender = UserProfile.Gender.FEMALE;
         }
 
@@ -339,6 +384,8 @@ public class Menu {
         System.out.print("Injury notes (leave blank if none): ");
         String injuryNotes = scanner.nextLine();
 
+
+
         userProfile = new UserProfile(age, gender, height, weight, level, injuryNotes);
         saveProfile(loggedInUser.getId());
         System.out.println("Profile created!");
@@ -358,6 +405,7 @@ public class Menu {
     private void updateStats() {
         boolean running = true;
         while (running) {
+
             System.out.println("\n=== Update Stats ===");
             System.out.println("1. Update weight");
             System.out.println("2. Update height");
@@ -366,6 +414,7 @@ public class Menu {
             System.out.println("5. Update injury notes");
             System.out.println("6. Back");
             System.out.print("Choose: ");
+
 
             int choice = readInt();
             if (choice == 1) {
@@ -379,6 +428,7 @@ public class Menu {
                 updateSavedProfile(loggedInUser.getId());
                 System.out.println("Height updated.");
             } else if (choice == 3) {
+
                 System.out.print("New age: ");
                 userProfile.setAge(readInt());
                 updateSavedProfile(loggedInUser.getId());
@@ -407,6 +457,8 @@ public class Menu {
                 System.out.println("Invalid choice, try again.");
             }
         }
+
+
     }
 
 
@@ -417,12 +469,17 @@ public class Menu {
                 return user;
             }
         }
+
+
         return null;
+
+
     }
 
     // Bruges til menuvalg - returnerer -1 hvis input ikke er et tal så if/else rammer default
     private int readInt() {
         try {
+
             return Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
             return -1;
@@ -434,9 +491,12 @@ public class Menu {
         try {
             return Float.parseFloat(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
+
+
             System.out.println("Invalid number, defaulting to 0.");
             return 0f;
         }
+
     }
 
 }
