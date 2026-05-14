@@ -32,11 +32,7 @@ public class User {
 
             for (User user : users) {
 
-                writer.write(
-                        user.getId() + ";" +
-                                user.getUsername() + ";" +
-                                user.getPassword() + "\n"
-                );
+                writer.write(user.getId() + ";" + user.getUsername() + ";" + user.getPassword() + "\n");
             }
 
         } catch (IOException e) {
@@ -66,9 +62,7 @@ public class User {
     }
 
     // Login metode
-    public static boolean login(ArrayList<User> users,
-                                String username,
-                                String password) {
+    public static boolean login(ArrayList<User> users, String username, String password) {
 
         for (User user : users) {
 
