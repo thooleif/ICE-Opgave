@@ -3,7 +3,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -13,10 +16,17 @@ public class Menu {
     private ArrayList<User> users;
     private User loggedInUser;
     private UserProfile userProfile;
+    private FitnessGoal fitnessGoal;
+    private TrainingPreference trainingPreference;
 
     // Stier til CSV-filer - bygges ud fra projektets rod-mappe
     private static final String USERS_FILE = "Data/Users.csv";
     private static final String STATS_FILE = "Data/UserStats.csv";
+    private static final String GOALS_FILE = "Data/FitnessGoals.csv";
+    private static final String PREFS_FILE = "Data/TrainingPreferences.csv";
+
+    // Bruges til at læse en deadline-dato ind fra brugeren
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 
 
@@ -26,6 +36,8 @@ public class Menu {
         users = new ArrayList<>();
         loggedInUser = null;
         userProfile = null;
+        fitnessGoal = null;
+        trainingPreference = null;
 
         // Sørg for at Data-mappen og filerne eksisterer
         ensureFilesExist();
@@ -51,6 +63,17 @@ public class Menu {
             if (!statsFile.exists()) {
 
                 statsFile.createNewFile();
+            }
+
+            // Nye filer til mål og præferencer
+            File goalsFile = new File(GOALS_FILE);
+            if (!goalsFile.exists()) {
+                goalsFile.createNewFile();
+            }
+
+            File prefsFile = new File(PREFS_FILE);
+            if (!prefsFile.exists()) {
+                prefsFile.createNewFile();
             }
         } catch (IOException e) {
             System.out.println("Error creating data files: " + e.getMessage());
@@ -207,11 +230,6 @@ public class Menu {
 
 
 
-
-
-
-
-
     // Første menu brugeren ser når programmet startes
     public void start() {
         System.out.println("=== Fitness App ===");
@@ -271,6 +289,20 @@ public class Menu {
                 System.out.println("Profile loaded.");
             }
 
+            // Læser mål og præferencer direkte fra klasserne - de styrer selv deres CSV
+            // Hvis brugeren ikke har en endnu, tvinger vi dem til at oprette en med det samme
+            fitnessGoal = FitnessGoal.load(loggedInUser.getId());
+            if (fitnessGoal == null) {
+                System.out.println("You haven't set a fitness goal yet. Let's do that now");
+                createFitnessGoal();
+            }
+
+            trainingPreference = TrainingPreference.load(loggedInUser.getId());
+            if (trainingPreference == null) {
+                System.out.println("You haven't picked training preferences yet. Let's do that now");
+                createTrainingPreference();
+            }
+
             mainMenu();
         } else {
             System.out.println("Wrong username or password.");
@@ -309,8 +341,8 @@ public class Menu {
     }
 
 
-    // Hovedmenuen som vises efter login - profil er altid oprettet på dette tidspunkt
-    // fordi login() tvinger brugeren til at lave en hvis de ikke har en
+    // Hovedmenuen som vises efter login - profil, mål og præferencer er altid oprettet på dette tidspunkt
+    // fordi login() tvinger brugeren til at lave dem hvis de ikke findes
     private void mainMenu() {
         boolean running = true;
         while (running) {
@@ -320,7 +352,11 @@ public class Menu {
 
             System.out.println("1. View profile");
             System.out.println("2. Update stats");
-            System.out.println("3. Logout");
+            System.out.println("3. View fitness goal");
+            System.out.println("4. Update fitness goal");
+            System.out.println("5. View training preferences");
+            System.out.println("6. Update training preferences");
+            System.out.println("7. Logout");
             System.out.print("Choose: ");
 
             int choice = readInt();
@@ -331,8 +367,18 @@ public class Menu {
             } else if (choice == 2) {
                 updateStats();
             } else if (choice == 3) {
+                viewFitnessGoal();
+            } else if (choice == 4) {
+                updateFitnessGoal();
+            } else if (choice == 5) {
+                viewTrainingPreference();
+            } else if (choice == 6) {
+                updateTrainingPreference();
+            } else if (choice == 7) {
                 loggedInUser = null;
                 userProfile = null;
+                fitnessGoal = null;
+                trainingPreference = null;
                 System.out.println("You have been logged out.");
                 running = false;
             } else {
@@ -459,6 +505,328 @@ public class Menu {
         }
 
 
+    }
+
+
+    // ============================================================
+    // Fitness Goal flow - kalder bare FitnessGoal.save/update fra klassen selv
+    // ============================================================
+
+    // Oprettelse af mål - kaldes første gang efter profil, eller hvis brugeren ikke har et endnu
+    private void createFitnessGoal() {
+        System.out.println("\n=== Set Fitness Goal ===");
+
+        FitnessGoal.GoalType goalType = readGoalType();
+
+        System.out.print("Target weight (kg): ");
+        float target = readFloat();
+
+        // Forslår at bruge nuværende vægt som startvægt - hvis brugeren har en profil
+        // så de ikke skal skrive den samme tal to gange
+        float defaultStart = userProfile != null ? userProfile.getWeightKg() : 0f;
+        System.out.print("Start weight (kg) [press enter to use current weight " + defaultStart + "]: ");
+        String startInput = scanner.nextLine().trim();
+        float start;
+        if (startInput.isEmpty()) {
+            start = defaultStart;
+        } else {
+            try {
+                start = Float.parseFloat(startInput);
+            } catch (NumberFormatException e) {
+                start = defaultStart;
+            }
+        }
+
+        Date deadline = readDate();
+
+        System.out.print("Weekly weight change (kg, fx 0.5 for at tage på, -0.5 for at tabe): ");
+        float weekly = readFloat();
+
+        fitnessGoal = new FitnessGoal(goalType, target, start, deadline, weekly);
+        fitnessGoal.save(loggedInUser.getId());
+        System.out.println("Fitness goal created!");
+    }
+
+    private void viewFitnessGoal() {
+        if (fitnessGoal == null) {
+            System.out.println("No fitness goal set.");
+            return;
+        }
+
+        System.out.println("\n" + fitnessGoal);
+        System.out.printf("Weekly target: %.2f kg%n", fitnessGoal.calculateWeeklyTarget());
+
+        // Vis status ift. nuværende vægt - giver hurtigt et overblik over om man er i mål
+        if (userProfile != null) {
+            boolean reached = fitnessGoal.isGoalReached(userProfile.getWeightKg());
+            if (reached) {
+                System.out.println("Status: Goal reached! Godt gået!");
+            } else {
+                System.out.println("Status: Not there yet - keep going");
+            }
+        }
+    }
+
+    // Lader brugeren opdatere de enkelte felter på målet en ad gangen
+    // Samme stil som updateStats - tæt på hinanden hvad gjorde det nemt at copy paste fra
+    private void updateFitnessGoal() {
+        if (fitnessGoal == null) {
+            System.out.println("No fitness goal yet - let's create one.");
+            createFitnessGoal();
+            return;
+        }
+
+        boolean running = true;
+        while (running) {
+
+            System.out.println("\n=== Update Fitness Goal ===");
+            System.out.println("1. Change goal type");
+            System.out.println("2. Update target weight");
+            System.out.println("3. Update start weight");
+            System.out.println("4. Update deadline");
+            System.out.println("5. Update weekly weight change");
+            System.out.println("6. Reset entire goal (set everything from scratch)");
+            System.out.println("7. Back");
+            System.out.print("Choose: ");
+
+            int choice = readInt();
+            if (choice == 1) {
+                FitnessGoal.GoalType type = readGoalType();
+                // Bruger updateGoal til at sætte alt på en gang så vi beholder de andre værdier
+                fitnessGoal.updateGoal(type,
+                        fitnessGoal.getTargetWeightKg(),
+                        fitnessGoal.getStartWeightKg(),
+                        fitnessGoal.getDeadlineDate(),
+                        fitnessGoal.getWeeklyWeightChangeKg());
+                fitnessGoal.update(loggedInUser.getId());
+            } else if (choice == 2) {
+                System.out.print("New target weight (kg): ");
+                float t = readFloat();
+                fitnessGoal.updateGoal(fitnessGoal.getGoalType(),
+                        t,
+                        fitnessGoal.getStartWeightKg(),
+                        fitnessGoal.getDeadlineDate(),
+                        fitnessGoal.getWeeklyWeightChangeKg());
+                fitnessGoal.update(loggedInUser.getId());
+            } else if (choice == 3) {
+                System.out.print("New start weight (kg): ");
+                float s = readFloat();
+                fitnessGoal.updateGoal(fitnessGoal.getGoalType(),
+                        fitnessGoal.getTargetWeightKg(),
+                        s,
+                        fitnessGoal.getDeadlineDate(),
+                        fitnessGoal.getWeeklyWeightChangeKg());
+                fitnessGoal.update(loggedInUser.getId());
+            } else if (choice == 4) {
+                Date d = readDate();
+                fitnessGoal.updateGoal(fitnessGoal.getGoalType(),
+                        fitnessGoal.getTargetWeightKg(),
+                        fitnessGoal.getStartWeightKg(),
+                        d,
+                        fitnessGoal.getWeeklyWeightChangeKg());
+                fitnessGoal.update(loggedInUser.getId());
+            } else if (choice == 5) {
+                System.out.print("New weekly weight change (kg): ");
+                float w = readFloat();
+                fitnessGoal.updateGoal(fitnessGoal.getGoalType(),
+                        fitnessGoal.getTargetWeightKg(),
+                        fitnessGoal.getStartWeightKg(),
+                        fitnessGoal.getDeadlineDate(),
+                        w);
+                fitnessGoal.update(loggedInUser.getId());
+            } else if (choice == 6) {
+                // Genbruger createFitnessGoal - den overskriver bare fitnessGoal og gemmer
+                createFitnessGoal();
+            } else if (choice == 7) {
+                running = false;
+            } else {
+                System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    // Lille helper der spørger om goal type - bruges flere steder
+    private FitnessGoal.GoalType readGoalType() {
+        System.out.println("Goal type:");
+        System.out.println("  1 = Bulk up (tage på)");
+        System.out.println("  2 = Lose weight (tabe sig)");
+        System.out.println("  3 = Maintain (holde vægten)");
+        System.out.println("  4 = Recomp (tabe fedt og bygge muskel samtidig)");
+        System.out.print("Choose: ");
+        int c = readInt();
+
+        if (c == 2) {
+            return FitnessGoal.GoalType.LOSE_WEIGHT;
+        } else if (c == 3) {
+            return FitnessGoal.GoalType.MAINTAIN;
+        } else if (c == 4) {
+            return FitnessGoal.GoalType.RECOMP;
+        } else {
+            return FitnessGoal.GoalType.BULK_UP;
+        }
+    }
+
+    // Helper til at læse en dato i format yyyy-MM-dd - falder tilbage til dagens dato hvis input er forkert
+    private Date readDate() {
+        System.out.print("Deadline (yyyy-MM-dd): ");
+        String input = scanner.nextLine().trim();
+        try {
+            return DATE_FORMAT.parse(input);
+        } catch (ParseException e) {
+            System.out.println("Invalid date format, using today as deadline.");
+            return new Date();
+        }
+    }
+
+
+    // ============================================================
+    // Training Preference flow - kalder bare TrainingPreference.save/update
+    // ============================================================
+
+    // Spørger om alle træningspræferencer og laver objektet
+    private void createTrainingPreference() {
+        System.out.println("\n=== Set Training Preferences ===");
+
+        TrainingPreference.ProgramFocus focus = readProgramFocus();
+
+        // Strength og cardio sættes som default ud fra fokus - så slipper brugeren for at svare på
+        // et åbenlyst spørgsmål (en powerlifter vil selvfølgelig have strength = true)
+        // Men de bliver alligevel spurgt så de kan vælge begge dele hvis de vil
+        boolean defaultStrength = focus != TrainingPreference.ProgramFocus.CARDIO;
+        boolean defaultCardio = focus == TrainingPreference.ProgramFocus.CARDIO
+                || focus == TrainingPreference.ProgramFocus.GENERAL_LIFESTYLE;
+
+        boolean wantsStrength = readYesNo("Do you want strength training included? (default: " + (defaultStrength ? "yes" : "no") + ")", defaultStrength);
+        boolean wantsCardio = readYesNo("Do you want cardio included? (default: " + (defaultCardio ? "yes" : "no") + ")", defaultCardio);
+
+        System.out.print("How many training days per week (1-7): ");
+        int days = readInt();
+        if (days < 1 || days > 7) {
+            System.out.println("Out of range - setting to 3 days as default.");
+            days = 3;
+        }
+
+        System.out.print("Session duration in minutes (fx 60): ");
+        int duration = readInt();
+        if (duration <= 0) {
+            duration = 60;
+        }
+
+        trainingPreference = new TrainingPreference(wantsStrength, wantsCardio, focus, days, duration);
+        trainingPreference.save(loggedInUser.getId());
+        System.out.println("Training preferences saved!");
+    }
+
+    private void viewTrainingPreference() {
+        if (trainingPreference == null) {
+            System.out.println("No training preferences set.");
+            return;
+        }
+
+        System.out.println("\n" + trainingPreference);
+        // Vis også det anbefalede split så det giver lidt mere værdig at se profilen
+        System.out.println("Recommended split: " + trainingPreference.getRecommendedSplit());
+    }
+
+    // Update menu for preferences - samme struktur som updateFitnessGoal
+    private void updateTrainingPreference() {
+        if (trainingPreference == null) {
+            System.out.println("No preferences yet - let's create them.");
+            createTrainingPreference();
+            return;
+        }
+
+        boolean running = true;
+        while (running) {
+
+            System.out.println("\n=== Update Training Preferences ===");
+            System.out.println("1. Change program focus (cardio / powerlifting / bodybuilding / general)");
+            System.out.println("2. Toggle strength training");
+            System.out.println("3. Toggle cardio");
+            System.out.println("4. Update training days per week");
+            System.out.println("5. Update session duration");
+            System.out.println("6. Reset entire preferences");
+            System.out.println("7. Back");
+            System.out.print("Choose: ");
+
+            int choice = readInt();
+            if (choice == 1) {
+                trainingPreference.setProgramFocus(readProgramFocus());
+                trainingPreference.update(loggedInUser.getId());
+                System.out.println("Program focus updated.");
+            } else if (choice == 2) {
+                trainingPreference.setWantsStrength(!trainingPreference.getWantsStrength());
+                trainingPreference.update(loggedInUser.getId());
+                System.out.println("Strength training is now: " + trainingPreference.getWantsStrength());
+            } else if (choice == 3) {
+                trainingPreference.setWantsCardio(!trainingPreference.getWantsCardio());
+                trainingPreference.update(loggedInUser.getId());
+                System.out.println("Cardio is now: " + trainingPreference.getWantsCardio());
+            } else if (choice == 4) {
+                System.out.print("New training days per week (1-7): ");
+                int d = readInt();
+                if (d < 1 || d > 7) {
+                    System.out.println("Out of range - keeping old value.");
+                } else {
+                    trainingPreference.setTrainingDaysPerWeek(d);
+                    trainingPreference.update(loggedInUser.getId());
+                    System.out.println("Training days updated.");
+                }
+            } else if (choice == 5) {
+                System.out.print("New session duration (minutes): ");
+                int m = readInt();
+                if (m <= 0) {
+                    System.out.println("Must be positive - keeping old value.");
+                } else {
+                    trainingPreference.setSessionDurationMin(m);
+                    trainingPreference.update(loggedInUser.getId());
+                    System.out.println("Session duration updated.");
+                }
+            } else if (choice == 6) {
+                createTrainingPreference();
+            } else if (choice == 7) {
+                running = false;
+            } else {
+                System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    // Spørger om programfokus - de fire valg fra opgaven
+    private TrainingPreference.ProgramFocus readProgramFocus() {
+        System.out.println("Program focus:");
+        System.out.println("  1 = Cardio");
+        System.out.println("  2 = Powerlifting");
+        System.out.println("  3 = Bodybuilding");
+        System.out.println("  4 = General lifestyle (normal aktiv hverdag)");
+        System.out.print("Choose: ");
+        int c = readInt();
+
+        if (c == 1) {
+            return TrainingPreference.ProgramFocus.CARDIO;
+        } else if (c == 2) {
+            return TrainingPreference.ProgramFocus.POWERLIFTING;
+        } else if (c == 3) {
+            return TrainingPreference.ProgramFocus.BODYBUILDING;
+        } else {
+            return TrainingPreference.ProgramFocus.GENERAL_LIFESTYLE;
+        }
+    }
+
+    // Helper til ja/nej spørgsmål - tom input giver default-værdien
+    private boolean readYesNo(String prompt, boolean defaultValue) {
+        System.out.print(prompt + " (y/n): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.isEmpty()) {
+            return defaultValue;
+        }
+        if (input.startsWith("y") || input.startsWith("j")) {
+            return true;
+        }
+        if (input.startsWith("n")) {
+            return false;
+        }
+        return defaultValue;
     }
 
 
