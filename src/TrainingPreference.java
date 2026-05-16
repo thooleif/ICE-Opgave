@@ -105,10 +105,10 @@ public class TrainingPreference {
         }
     }
 
-    // ============================================================
+
     // CSV - gemmer og indlæser præferencer fra fil
     // Lagt i klassen selv så Menu ikke skal kende til filformatet
-    // ============================================================
+
 
     // Lille helper der laver én CSV-linje for denne præference
     // private fordi det er en intern detalje - kun klassen selv skal bruge den

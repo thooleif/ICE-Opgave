@@ -18,12 +18,14 @@ public class Menu {
     private UserProfile userProfile;
     private FitnessGoal fitnessGoal;
     private TrainingPreference trainingPreference;
+    private MacroPlan macroPlan;
 
     // Stier til CSV-filer - bygges ud fra projektets rod-mappe
     private static final String USERS_FILE = "Data/Users.csv";
     private static final String STATS_FILE = "Data/UserStats.csv";
     private static final String GOALS_FILE = "Data/FitnessGoals.csv";
     private static final String PREFS_FILE = "Data/TrainingPreferences.csv";
+    private static final String MACROS_FILE = "Data/MacroPlans.csv";
 
     // Bruges til at læse en deadline-dato ind fra brugeren
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -38,15 +40,17 @@ public class Menu {
         userProfile = null;
         fitnessGoal = null;
         trainingPreference = null;
+        macroPlan = null;
 
-        // Sørg for at Data-mappen og filerne eksisterer
+        // Sørg for at Data-mappen og filerne eksisterer DEN ER CRAZY LUKSUS DEN HER BOYs
+
         ensureFilesExist();
 
         // Indlæs eksisterende brugere fra CSV når programmet starter
         loadUsers();
     }
 
-    // Opretter Data-mappen og CSV-filerne hvis de ikke findes
+    // Opretter Data-mappen og CSV-filerne hvis de ikke findes den er meg afed den her
     private void ensureFilesExist() {
         try {
             File dataDir = new File("Data");
@@ -74,6 +78,12 @@ public class Menu {
             File prefsFile = new File(PREFS_FILE);
             if (!prefsFile.exists()) {
                 prefsFile.createNewFile();
+            }
+
+            // Fil til makroplaner - laves automatisk så load ikke fejler første gang
+            File macrosFile = new File(MACROS_FILE);
+            if (!macrosFile.exists()) {
+                macrosFile.createNewFile();
             }
         } catch (IOException e) {
             System.out.println("Error creating data files: " + e.getMessage());
@@ -303,6 +313,10 @@ public class Menu {
                 createTrainingPreference();
             }
 
+            // Makroplan er valgfri - brugeren generere den selv fra menuen
+            // Hvis der ligger en på disk så loader vi den så de kan se den med det samme
+            macroPlan = MacroPlan.load(loggedInUser.getId());
+
             mainMenu();
         } else {
             System.out.println("Wrong username or password.");
@@ -356,7 +370,8 @@ public class Menu {
             System.out.println("4. Update fitness goal");
             System.out.println("5. View training preferences");
             System.out.println("6. Update training preferences");
-            System.out.println("7. Logout");
+            System.out.println("7. View / generate macro plan");
+            System.out.println("8. Logout");
             System.out.print("Choose: ");
 
             int choice = readInt();
@@ -375,10 +390,13 @@ public class Menu {
             } else if (choice == 6) {
                 updateTrainingPreference();
             } else if (choice == 7) {
+                macroPlanMenu();
+            } else if (choice == 8) {
                 loggedInUser = null;
                 userProfile = null;
                 fitnessGoal = null;
                 trainingPreference = null;
+                macroPlan = null;
                 System.out.println("You have been logged out.");
                 running = false;
             } else {
@@ -508,9 +526,8 @@ public class Menu {
     }
 
 
-    // ============================================================
     // Fitness Goal flow - kalder bare FitnessGoal.save/update fra klassen selv
-    // ============================================================
+
 
     // Oprettelse af mål - kaldes første gang efter profil, eller hvis brugeren ikke har et endnu
     private void createFitnessGoal() {
@@ -560,7 +577,7 @@ public class Menu {
         if (userProfile != null) {
             boolean reached = fitnessGoal.isGoalReached(userProfile.getWeightKg());
             if (reached) {
-                System.out.println("Status: Goal reached! Great job!");
+                System.out.println("Status: Goal reached! Godt gået!");
             } else {
                 System.out.println("Status: Not there yet - keep going");
             }
@@ -679,9 +696,9 @@ public class Menu {
     }
 
 
-    // ============================================================
+
     // Training Preference flow - kalder bare TrainingPreference.save/update
-    // ============================================================
+
 
     // Spørger om alle træningspræferencer og laver objektet
     private void createTrainingPreference() {
@@ -729,9 +746,7 @@ public class Menu {
     }
 
     // Update menu for preferences - samme struktur som updateFitnessGoal
-    private void updateTrainingPreference()
-
-    {
+    private void updateTrainingPreference() {
         if (trainingPreference == null) {
             System.out.println("No preferences yet - let's create them.");
             createTrainingPreference();
@@ -739,15 +754,12 @@ public class Menu {
         }
 
         boolean running = true;
-
-
         while (running) {
 
             System.out.println("\n=== Update Training Preferences ===");
             System.out.println("1. Change program focus (cardio / powerlifting / bodybuilding / general)");
             System.out.println("2. Toggle strength training");
             System.out.println("3. Toggle cardio");
-
             System.out.println("4. Update training days per week");
             System.out.println("5. Update session duration");
             System.out.println("6. Reset entire preferences");
@@ -759,7 +771,6 @@ public class Menu {
                 trainingPreference.setProgramFocus(readProgramFocus());
                 trainingPreference.update(loggedInUser.getId());
                 System.out.println("Program focus updated.");
-
             } else if (choice == 2) {
                 trainingPreference.setWantsStrength(!trainingPreference.getWantsStrength());
                 trainingPreference.update(loggedInUser.getId());
@@ -773,14 +784,12 @@ public class Menu {
                 int d = readInt();
                 if (d < 1 || d > 7) {
                     System.out.println("Out of range - keeping old value.");
-
                 } else {
                     trainingPreference.setTrainingDaysPerWeek(d);
                     trainingPreference.update(loggedInUser.getId());
                     System.out.println("Training days updated.");
                 }
             } else if (choice == 5) {
-
                 System.out.print("New session duration (minutes): ");
                 int m = readInt();
                 if (m <= 0) {
@@ -790,7 +799,6 @@ public class Menu {
                     trainingPreference.update(loggedInUser.getId());
                     System.out.println("Session duration updated.");
                 }
-
             } else if (choice == 6) {
                 createTrainingPreference();
             } else if (choice == 7) {
@@ -801,14 +809,74 @@ public class Menu {
         }
     }
 
+    // Macro Plan flow - genererer kalorier og makros ud fra 2026 standarder
+    // Bruger Mifflin-St Jeor + ISSN protein guidelines (se MacroPlan.calculateFor)
+
+
+    // Submenu der lader brugeren generere, se og justere sin makroplan
+    private void macroPlanMenu() {
+
+        boolean running = true;
+        while (running) {
+
+            System.out.println("\n=== Macro Plan ===");
+
+            if (macroPlan != null) {
+                // Vis den nuværende plan med det samme så brugeren ved hvor de står
+                System.out.println(macroPlan);
+                System.out.println("Split: " + macroPlan.getMacroSplit());
+            } else {
+                System.out.println("No macro plan yet.");
+            }
+
+            System.out.println("\n1. Generate new macro plan (based on current profile, goal, prefs)");
+            System.out.println("2. Adjust calories up or down");
+            System.out.println("3. Show calculation method");
+            System.out.println("4. Back");
+            System.out.print("Choose: ");
+
+            int choice = readInt();
+            if (choice == 1) {
+                // Bygger en ny plan ud fra brugerens nuværende data
+                // Smider den gamle ud - hvis brugeren havde justeret manuelt, så er det væk
+                macroPlan = MacroPlan.calculateFor(userProfile, fitnessGoal, trainingPreference);
+                macroPlan.save(loggedInUser.getId());
+                System.out.println("New macro plan generated.");
+
+            } else if (choice == 2) {
+                if (macroPlan == null) {
+                    System.out.println("Generate a plan first.");
+                    continue;
+                }
+                System.out.print("Adjust calories by (+ to add, - to remove, fx -200): ");
+                int delta = readInt();
+                macroPlan.adjustCalories(delta);
+                macroPlan.update(loggedInUser.getId());
+
+            } else if (choice == 3) {
+                if (macroPlan == null) {
+                    System.out.println("Generate a plan first.");
+                    continue;
+                }
+                System.out.println("\nHow this was calculated:");
+                System.out.println(macroPlan.getCalculationMethod());
+
+            } else if (choice == 4) {
+                running = false;
+            } else {
+                System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+
     // Spørger om programfokus - de fire valg fra opgaven
     private TrainingPreference.ProgramFocus readProgramFocus() {
         System.out.println("Program focus:");
         System.out.println("  1 = Cardio");
         System.out.println("  2 = Powerlifting");
         System.out.println("  3 = Bodybuilding");
-
-        System.out.println("  4 = General lifestyle");
+        System.out.println("  4 = General lifestyle (normal aktiv hverdag)");
         System.out.print("Choose: ");
         int c = readInt();
 
@@ -818,7 +886,6 @@ public class Menu {
             return TrainingPreference.ProgramFocus.POWERLIFTING;
         } else if (c == 3) {
             return TrainingPreference.ProgramFocus.BODYBUILDING;
-
         } else {
             return TrainingPreference.ProgramFocus.GENERAL_LIFESTYLE;
         }
@@ -828,8 +895,6 @@ public class Menu {
     private boolean readYesNo(String prompt, boolean defaultValue) {
         System.out.print(prompt + " (y/n): ");
         String input = scanner.nextLine().trim().toLowerCase();
-
-
         if (input.isEmpty()) {
             return defaultValue;
         }

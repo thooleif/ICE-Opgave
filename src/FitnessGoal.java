@@ -107,10 +107,9 @@ public class FitnessGoal {
         return weeklyWeightChangeKg;
     }
 
-    // ============================================================
+
     // CSV - alle metoder til at gemme og indlæse mål fra fil
     // Ligger i klassen så Menu ikke skal bekymre sig om filformat
-    // ============================================================
 
     // Lille helper der laver én CSV-linje for dette mål
     private String toCsvLine(UUID userId) {
