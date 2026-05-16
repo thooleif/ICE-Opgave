@@ -526,9 +526,6 @@ public class Menu {
     }
 
 
-    // Fitness Goal flow - kalder bare FitnessGoal.save/update fra klassen selv
-
-
     // Oprettelse af mål - kaldes første gang efter profil, eller hvis brugeren ikke har et endnu
     private void createFitnessGoal() {
         System.out.println("\n=== Set Fitness Goal ===");
