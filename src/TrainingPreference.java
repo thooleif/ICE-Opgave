@@ -79,9 +79,9 @@ public class TrainingPreference {
         if (programFocus == ProgramFocus.POWERLIFTING) {
 
             if (trainingDaysPerWeek <= 3) {
-                return "Full Body (Squat / Bench / Deadlift fokus)";
+                return "Full Body (Squat / Bench / Deadlift focus)";
             } else {
-                return "Upper / Lower split med fokus på de 3 store løft";
+                return "Upper / Lower split med focus on the big 3";
             }
 
         } else if (programFocus == ProgramFocus.BODYBUILDING) {
@@ -96,12 +96,12 @@ public class TrainingPreference {
 
         } else if (programFocus == ProgramFocus.CARDIO) {
 
-            return "Cardio sessions (løb, cykling, intervaller) " + trainingDaysPerWeek + " gange om ugen";
+            return "Cardio sessions (run, biking, intervals) " + trainingDaysPerWeek + " times a week";
 
         } else {
 
             // General lifestyle - bare en blanding så man holder sig sund
-            return "Mix af styrke og cardio - cirka " + trainingDaysPerWeek + " dage";
+            return "mix of strength and cardio " + trainingDaysPerWeek + " days";
         }
     }
 

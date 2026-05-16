@@ -560,7 +560,7 @@ public class Menu {
         if (userProfile != null) {
             boolean reached = fitnessGoal.isGoalReached(userProfile.getWeightKg());
             if (reached) {
-                System.out.println("Status: Goal reached! Godt gået!");
+                System.out.println("Status: Goal reached! Great job!");
             } else {
                 System.out.println("Status: Not there yet - keep going");
             }
@@ -729,7 +729,9 @@ public class Menu {
     }
 
     // Update menu for preferences - samme struktur som updateFitnessGoal
-    private void updateTrainingPreference() {
+    private void updateTrainingPreference()
+
+    {
         if (trainingPreference == null) {
             System.out.println("No preferences yet - let's create them.");
             createTrainingPreference();
@@ -737,12 +739,15 @@ public class Menu {
         }
 
         boolean running = true;
+
+
         while (running) {
 
             System.out.println("\n=== Update Training Preferences ===");
             System.out.println("1. Change program focus (cardio / powerlifting / bodybuilding / general)");
             System.out.println("2. Toggle strength training");
             System.out.println("3. Toggle cardio");
+
             System.out.println("4. Update training days per week");
             System.out.println("5. Update session duration");
             System.out.println("6. Reset entire preferences");
@@ -754,6 +759,7 @@ public class Menu {
                 trainingPreference.setProgramFocus(readProgramFocus());
                 trainingPreference.update(loggedInUser.getId());
                 System.out.println("Program focus updated.");
+
             } else if (choice == 2) {
                 trainingPreference.setWantsStrength(!trainingPreference.getWantsStrength());
                 trainingPreference.update(loggedInUser.getId());
@@ -767,12 +773,14 @@ public class Menu {
                 int d = readInt();
                 if (d < 1 || d > 7) {
                     System.out.println("Out of range - keeping old value.");
+
                 } else {
                     trainingPreference.setTrainingDaysPerWeek(d);
                     trainingPreference.update(loggedInUser.getId());
                     System.out.println("Training days updated.");
                 }
             } else if (choice == 5) {
+
                 System.out.print("New session duration (minutes): ");
                 int m = readInt();
                 if (m <= 0) {
@@ -782,6 +790,7 @@ public class Menu {
                     trainingPreference.update(loggedInUser.getId());
                     System.out.println("Session duration updated.");
                 }
+
             } else if (choice == 6) {
                 createTrainingPreference();
             } else if (choice == 7) {
@@ -798,7 +807,8 @@ public class Menu {
         System.out.println("  1 = Cardio");
         System.out.println("  2 = Powerlifting");
         System.out.println("  3 = Bodybuilding");
-        System.out.println("  4 = General lifestyle (normal aktiv hverdag)");
+
+        System.out.println("  4 = General lifestyle");
         System.out.print("Choose: ");
         int c = readInt();
 
@@ -808,6 +818,7 @@ public class Menu {
             return TrainingPreference.ProgramFocus.POWERLIFTING;
         } else if (c == 3) {
             return TrainingPreference.ProgramFocus.BODYBUILDING;
+
         } else {
             return TrainingPreference.ProgramFocus.GENERAL_LIFESTYLE;
         }
@@ -817,6 +828,8 @@ public class Menu {
     private boolean readYesNo(String prompt, boolean defaultValue) {
         System.out.print(prompt + " (y/n): ");
         String input = scanner.nextLine().trim().toLowerCase();
+
+
         if (input.isEmpty()) {
             return defaultValue;
         }
