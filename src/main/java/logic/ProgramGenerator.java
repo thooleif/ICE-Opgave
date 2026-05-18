@@ -76,7 +76,7 @@ public class ProgramGenerator {
             if (!allExplosive.isEmpty()) {
                 Exercise ex = pickNewRandom(allExplosive);
                 if (ex != null) {
-                    result.add(new ProgramExercise(ex.getName(), 4, "3-5", 120, "Eksplosiv"));
+                    result.add(buildExercise(ex.getName(), 4, "3-5", 120, "Eksplosiv"));
                 }
             }
         }
@@ -97,7 +97,7 @@ public class ProgramGenerator {
 
             Exercise main = pickMainLift(compounds);
             if (main != null) {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     main.getName(),
                     mainCompoundSets(), mainCompoundReps(), mainCompoundRest(),
                     "Hovedøvelse"
@@ -116,7 +116,7 @@ public class ProgramGenerator {
             if (compounds.isEmpty()) continue;
             Exercise acc = pickNewRandom(compounds);
             if (acc != null) {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     acc.getName(),
                     accessoryCompoundSets(), accessoryCompoundReps(), accessoryCompoundRest(),
                     "Accessory"
@@ -136,7 +136,7 @@ public class ProgramGenerator {
             }
             List<Exercise> picked = pickNewRandomMultiple(allIsolation, remaining);
             for (Exercise ex : picked) {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     ex.getName(),
                     isolationSets(), isolationReps(), isolationRest(),
                     "Isolation"
@@ -172,11 +172,11 @@ public class ProgramGenerator {
 
             boolean isFirst = result.isEmpty();
             if (isFirst) {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     ex.getName(), mainCompoundSets(), mainCompoundReps(), mainCompoundRest(), "Hovedøvelse"
                 ));
             } else {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     ex.getName(), accessoryCompoundSets(), accessoryCompoundReps(), accessoryCompoundRest(), "Compound"
                 ));
             }
@@ -191,7 +191,7 @@ public class ProgramGenerator {
                 ));
             }
             for (Exercise ex : pickNewRandomMultiple(allIsolation, remaining)) {
-                result.add(new ProgramExercise(
+                result.add(buildExercise(
                     ex.getName(), isolationSets(), isolationReps(), isolationRest(), "Isolation"
                 ));
             }
@@ -248,7 +248,7 @@ public class ProgramGenerator {
         }
 
         for (Exercise ex : circuitExercises) {
-            result.add(new ProgramExercise(ex.getName(), rounds, "30s", 15, "Superset"));
+            result.add(buildExercise(ex.getName(), rounds, "30s", 15, "Superset"));
         }
 
         result.add(new ProgramExercise("── FINISHER ──", 0, "", 0, ""));
@@ -380,7 +380,7 @@ public class ProgramGenerator {
         abs = ExerciseClassifier.filterByExperience(abs, profile.getExperienceLevel());
         List<ProgramExercise> result = new ArrayList<>();
         for (Exercise ex : pickNewRandomMultiple(abs, 2)) {
-            result.add(new ProgramExercise(ex.getName(), 3, "12-15", 45, "Abs"));
+            result.add(buildExercise(ex.getName(), 3, "12-15", 45, "Abs"));
         }
         return result;
     }
@@ -390,6 +390,17 @@ public class ProgramGenerator {
     private String[][] determineSplit() {
         int days = prefs.getDaysPerWeek();
         boolean isKvinde = profile.getGender().equals("Kvinde");
+
+        if (days == 1) {
+            if (isKvinde) {
+                return new String[][]{
+                    {"Full Body", "Glutes", "Legs", "Back", "Shoulders", "Chest"}
+                };
+            }
+            return new String[][]{
+                {"Full Body", "Chest", "Back", "Legs", "Shoulders", "Glutes"}
+            };
+        }
 
         if (days <= 3) {
             String[][] split = new String[days][];
@@ -439,6 +450,29 @@ public class ProgramGenerator {
             };
         }
 
+        if (days == 7) {
+            if (isKvinde) {
+                return new String[][]{
+                    {"Push", "Shoulders", "Chest", "Triceps"},
+                    {"Pull", "Back", "Biceps"},
+                    {"Legs & Glutes", "Glutes", "Legs", "Calves"},
+                    {"Push", "Shoulders", "Chest", "Triceps"},
+                    {"Pull", "Back", "Biceps"},
+                    {"Legs & Glutes", "Glutes", "Legs", "Calves"},
+                    {"Full Body", "Glutes", "Legs", "Back", "Shoulders", "Chest"}
+                };
+            }
+            return new String[][]{
+                {"Push", "Chest", "Shoulders", "Triceps"},
+                {"Pull", "Back", "Biceps"},
+                {"Legs", "Legs", "Glutes", "Calves"},
+                {"Push", "Chest", "Shoulders", "Triceps"},
+                {"Pull", "Back", "Biceps"},
+                {"Legs", "Legs", "Glutes", "Calves"},
+                {"Full Body", "Chest", "Back", "Legs", "Shoulders", "Glutes"}
+            };
+        }
+
         if (isKvinde) {
             return new String[][]{
                 {"Push", "Shoulders", "Chest", "Triceps"},
@@ -460,6 +494,14 @@ public class ProgramGenerator {
     }
 
     // ========== UTILITIES ==========
+
+    private ProgramExercise buildExercise(String name, int sets, String reps, int rest, String tag) {
+        if (sets <= 0) {
+            return new ProgramExercise(name, sets, reps, rest, tag, -1f);
+        }
+        float weight = WeightSuggester.suggest(profile, goal, name, tag);
+        return new ProgramExercise(name, sets, reps, rest, tag, weight);
+    }
 
     private List<Exercise> filterAvailable(List<Exercise> exercises) {
         List<Exercise> filtered = ExerciseClassifier.filterByExperience(exercises, profile.getExperienceLevel());

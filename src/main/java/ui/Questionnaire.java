@@ -1,7 +1,6 @@
 package ui;
 
 import model.FitnessGoal;
-import model.TrainingPreference;
 import model.UserProfile;
 
 import java.util.ArrayList;
@@ -45,37 +44,127 @@ public class Questionnaire {
             "Bulk", "Cut", "Maintain"
         }));
 
-        goal.setPhysicalGoals(askMultiChoice("Hvad vil du opnå fysisk? (vælg op til 2)", new String[]{
-            "Stærkere", "Mere toned", "Eksplosiv", "Større"
-        }, 2));
+        goal.setPhysicalGoals(askPhysicalGoals());
 
         return goal;
     }
 
-    public TrainingPreference askPreferences() {
-        TrainingPreference pref = new TrainingPreference();
+    public List<String> askPhysicalGoals() {
+        System.out.println("\n--- Fysiske delmål ---\n");
+        return askMultiChoice("Hvad vil du opnå fysisk? (vælg op til 2)", new String[]{
+            "Stærkere", "Mere toned", "Eksplosiv", "Større"
+        }, 2);
+    }
 
-        System.out.println("\n========== PRÆFERENCER ==========\n");
+    /**
+     * Kombineret præference-flow: dine fokus-valg + teamets styrke/cardio-toggles og smarte defaults.
+     */
+    public TrainingPreferenceInput askFullPreferences() {
+        TrainingPreferenceInput input = new TrainingPreferenceInput();
 
-        pref.setFocus(askChoice("Hvad vil du fokusere på?", new String[]{
-            "Styrke", "Cardio", "HIIT", "Blanding af alt"
-        }));
+        System.out.println("\n========== TRÆNINGSPRÆFERENCER ==========\n");
 
-        pref.setTrainingStyle(askChoice("Hvordan vil du træne?", new String[]{
-            "Bodybuilder", "Atlet"
-        }));
+        input.setFocus(askFocusWithHints());
 
-        pref.setDaysPerWeek(askInt("Hvor mange dage om ugen vil du træne?", 2, 6));
+        boolean[] defaults = defaultStrengthCardio(input.getFocus());
+        input.setWantsStrength(askYesNo(
+                "Vil du have styrketræning med? (default: " + (defaults[0] ? "ja" : "nej") + ")",
+                defaults[0]));
+        input.setWantsCardio(askYesNo(
+                "Vil du have cardio med? (default: " + (defaults[1] ? "ja" : "nej") + ")",
+                defaults[1]));
 
-        pref.setSessionDurationMin(askChoiceInt("Hvor lang tid per session (minutter)?", new int[]{
+        if (shouldAskTrainingStyle(input)) {
+            input.setTrainingStyle(askTrainingStyle());
+        } else {
+            input.setTrainingStyle("Atlet");
+            System.out.println("Træningsstil sat til Atlet (passer bedst til dit fokus).");
+        }
+
+        input.setDaysPerWeek(askInt("Hvor mange dage om ugen vil du træne?", 1, 7));
+
+        input.setSessionDurationMin(askChoiceInt("Hvor lang tid per session (minutter)?", new int[]{
             30, 45, 60, 90
         }));
 
-        return pref;
+        return input;
+    }
+
+    public String askFocus() {
+        return askFocusWithHints();
+    }
+
+    private String askFocusWithHints() {
+        System.out.println("Hvad er dit primære træningsfokus?");
+        System.out.println("  1. Styrke — tunge løft, squat/bench/deadlift-inspireret");
+        System.out.println("  2. Cardio — løb, cykel, steady state");
+        System.out.println("  3. HIIT — korte intense intervaller/circuits");
+        System.out.println("  4. Blanding af alt — balanceret mix af styrke og cardio");
+
+        while (true) {
+            System.out.print("Vælg (1-4): ");
+            String raw = scanner.nextLine().trim();
+            try {
+                return switch (Integer.parseInt(raw)) {
+                    case 1 -> "Styrke";
+                    case 2 -> "Cardio";
+                    case 3 -> "HIIT";
+                    case 4 -> "Blanding af alt";
+                    default -> throw new NumberFormatException();
+                };
+            } catch (NumberFormatException e) {
+                System.out.println("Ugyldigt valg, prøv igen.");
+            }
+        }
+    }
+
+    private boolean[] defaultStrengthCardio(String focus) {
+        return switch (focus) {
+            case "Styrke" -> new boolean[]{true, false};
+            case "Cardio" -> new boolean[]{false, true};
+            case "HIIT" -> new boolean[]{false, true};
+            case "Blanding af alt" -> new boolean[]{true, true};
+            default -> new boolean[]{true, false};
+        };
+    }
+
+    private boolean shouldAskTrainingStyle(TrainingPreferenceInput input) {
+        if ("HIIT".equals(input.getFocus()) || "Cardio".equals(input.getFocus())) {
+            return input.isWantsStrength();
+        }
+        return !"Cardio".equals(input.getFocus());
+    }
+
+    public String askTrainingStyle() {
+        System.out.println("Hvordan vil du primært træne?");
+        System.out.println("  1. Bodybuilder — volumen, hypertrofi, isolation");
+        System.out.println("  2. Atlet — compounds, power, funktionel styrke");
+        return askChoice("", new String[]{"Bodybuilder", "Atlet"});
+    }
+
+    public boolean askYesNo(String prompt, boolean defaultValue) {
+        System.out.print(prompt + " (j/n): ");
+        String input = scanner.nextLine().trim().toLowerCase();
+        if (input.isEmpty()) {
+            return defaultValue;
+        }
+        if (input.startsWith("j") || input.startsWith("y")) {
+            return true;
+        }
+        if (input.startsWith("n")) {
+            return false;
+        }
+        return defaultValue;
+    }
+
+    public int askSessionDuration() {
+        return askChoiceInt("Hvor lang tid per session (minutter)?", new int[]{30, 45, 60, 90});
     }
 
     private String askChoice(String question, String[] options) {
-        System.out.println(question);
+        if (!question.isBlank()) {
+            System.out.println(question);
+        }
         for (int i = 0; i < options.length; i++) {
             System.out.println("  " + (i + 1) + ". " + options[i]);
         }

@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TrainingDay {
@@ -10,12 +11,15 @@ public class TrainingDay {
     public TrainingDay(String dayName, String focus, List<ProgramExercise> exercises) {
         this.dayName = dayName;
         this.focus = focus;
-        this.exercises = exercises;
+        this.exercises = exercises != null ? new ArrayList<>(exercises) : new ArrayList<>();
     }
 
     public String getDayName() { return dayName; }
     public String getFocus() { return focus; }
     public List<ProgramExercise> getExercises() { return exercises; }
+
+    public void setDayName(String dayName) { this.dayName = dayName; }
+    public void setFocus(String focus) { this.focus = focus; }
 
     @Override
     public String toString() {

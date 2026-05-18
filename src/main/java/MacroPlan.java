@@ -73,6 +73,10 @@ public class MacroPlan {
             activityFactor = 1.9f;   // Ekstrem aktiv (7 dage)
         }
 
+        if (prefs.getWantsCardio() && activityFactor < 1.9f) {
+            activityFactor = Math.min(1.9f, activityFactor + 0.05f);
+        }
+
         // TDEE = BMR * aktivitetsfaktor
         float tdee = bmr * activityFactor;
 
@@ -114,9 +118,7 @@ public class MacroPlan {
         // Trin 5: Fedt - minimum 0.8 g/kg for hormoner og fedtoploselige vitaminer
         // Powerlifting og bodybuilding lægger lidt mere på til mæthed
         float fatPerKg;
-        TrainingPreference.ProgramFocus focus = prefs.getProgramFocus();
-        if (focus == TrainingPreference.ProgramFocus.POWERLIFTING
-                || focus == TrainingPreference.ProgramFocus.BODYBUILDING) {
+        if ("Bodybuilder".equals(prefs.getTrainingStyle()) || "Styrke".equals(prefs.getFocus())) {
             fatPerKg = 1.0f;
         } else {
             fatPerKg = 0.9f;
