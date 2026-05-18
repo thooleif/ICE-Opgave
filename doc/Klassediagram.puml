@@ -1,21 +1,28 @@
 @startuml FitnessDomainModel
-'LAV DEN HER PÅ ENGELSK
+
 title Fitness Program — Domain Model
 
 class User {
   + userId : UUID
   + name : String
   + email : String
-  + createdDate : Date
+  --
+  + register() : void
+  + login() : void
 }
 
 class UserProfile {
   + age : Int
-  + gender : Enum {Male, Female, Other}
+  + gender : Enum {Male, Female}
   + heightCm : Float
   + weightKg : Float
-  + experienceLevel : Enum {Beginner, Intermediate, Advanced}
+  + experienceLevel : Enum {Beginner, novice, Intermediate, Advanced}
   + injuryNotes : String
+  --
+  + updateStats() : void
+  + calculateBMI() : Float
+  + setExperienceLevel() : void
+  + addInjuryNote(String) : void
 }
 
 class FitnessGoal {
@@ -24,23 +31,34 @@ class FitnessGoal {
   + startWeightKg : Float
   + deadlineDate : Date
   + weeklyWeightChangeKg : Float
+  --
+  + setGoal() : void
+  + updateGoal() : void
+  + calculateWeeklyTarget() : Float
+  + isGoalReached() : Boolean
 }
 
 class TrainingPreference {
   + wantsStrength : Boolean
   + wantsCardio : Boolean
-  + wantsHIIT : Boolean
   + programFocus : Enum {GeneralLifestyle, Bodybuilding, SpecificSport, Other}
   + sportSpecification : String
   + trainingDaysPerWeek : Int
   + sessionDurationMin : Int
+  --
+  + setPreferences() : void
+  + updatePreferences() : void
+  + getRecommendedSplit() : String
 }
 
 class FitnessProgram {
   + programId : UUID
   + createdDate : Date
-  + status : Enum {Active, Completed, Paused}
+  + status : Enum {Active, Completed}
   + durationWeeks : Int
+  --
+  + completeProgram() : void
+  + generateProgram() : void
 }
 
 class MacroPlan {
@@ -50,6 +68,11 @@ class MacroPlan {
   + fatGram : Int
   + calculationMethod : String
   + adjustmentFactor : Float
+  --
+  + calculateMacros() : void
+  + adjustCalories(amount : Int) : void
+  + getMacroSplit() : String
+  + recalculate() : void
 }
 
 class TrainingPlan {
@@ -57,6 +80,10 @@ class TrainingPlan {
   + name : String
   + weeklyStructure : String
   + injuryConsiderations : String[]
+  --
+  + createPlan() : void
+  + updatePlan() : void
+  + getWeeklyOverview() : String
 }
 
 class TrainingWeek {
@@ -64,6 +91,9 @@ class TrainingWeek {
   + startDate : Date
   + endDate : Date
   + status : Enum {Planned, Active, Completed}
+  --
+  + completeWeek() : void
+  + getDaysOverview() : List
 }
 
 class TrainingDay {
@@ -71,13 +101,17 @@ class TrainingDay {
   + dayName : String
   + focus : Enum {Push, Pull, Legs, FullBody, Cardio, Rest}
   + estimatedDuration : Int
+  --
+  + startSession() : void
+  + completeSession() : void
+  + getExerciseList() : List
 }
 
-class ExerciseCatalog <ExternalAPI> {
-  + getExercisesByLevel()
-  + getExercisesByMuscleGroup()
-  + filterByInjuries()
-  + getAlternativeExercises()
+class ExerciseCatalog <<ExternalAPI>> {
+  --
+  + getExercisesByLevel(level : Enum) : List
+  + getExercisesByMuscleGroup(group : String) : List
+  + getAlternativeExercises(exerciseId : UUID) : List
 }
 
 class Exercise {
@@ -88,6 +122,9 @@ class Exercise {
   + experienceLevel : Enum
   + injuryFriendly : Boolean
   + videoUrl : String
+  --
+  + getDetails() : String
+  + getAlternatives() : List
 }
 
 class ProgramExercise {
@@ -96,6 +133,10 @@ class ProgramExercise {
   + restTimeSec : Int
   + progressionNote : String
   + alternativeExercise : String
+  --
+  + updateSetsReps(sets : Int, reps : String) : void
+  + swapExercise(exerciseId : UUID) : void
+  + addProgressionNote(note : String) : void
 }
 
 class WeeklyWeighIn {
@@ -103,31 +144,72 @@ class WeeklyWeighIn {
   + date : Date
   + weightKg : Float
   + weekNumber : Int
-  + notes : String
+  --
+  + logWeight(weight : Float) : void
+  + getWeighInHistory() : List
 }
 
 class WeightProgress {
   + totalChangeKg : Float
-  + percentCompleted : Float
   + averageChangePerWeek : Float
-  + estimatedCompletionDate : Date
-  + onTrack : Boolean
+  --
+  + calculateProgress() : void
+  + getProgressReport() : String
 }
 
 class MacroAdjustment {
-  + adjustmentDate : Date
   + oldCalories : Int
   + newCalories : Int
-  + reason : String
   + recommendation : String
+  --
+  + triggerAdjustment() : void
+  + getAdjustmentHistory() : List
 }
+
+class UserInputHandler <<Scanner>> {
+  - scanner : Scanner
+  --
+  + readName() : String
+  + readAge() : Int
+  + readHeight() : Float
+  + readWeight() : Float
+  + readGender() : Enum
+  + readExperienceLevel() : Enum
+  + readGoalType() : Enum
+  + readTargetWeight() : Float
+  + readTrainingPreferences() : TrainingPreference
+  + readWeeklyWeighIn() : Float
+  + readProgramFocus() : Enum
+  + closeScanner() : void
+}
+
+'class DatabaseRepository <<Database>> {
+'  - connectionUrl : String
+'  - connection : Connection
+'  --
+'  + connect() : void
+'  + disconnect() : void
+'  + saveUser(user : User) : void
+'  + getUserById(userId : UUID) : User
+'  + saveUserProfile(profile : UserProfile) : void
+'  + getUserProfile(userId : UUID) : UserProfile
+'  + saveFitnessProgram(program : FitnessProgram) : void
+'  + getFitnessProgramByUser(userId : UUID) : FitnessProgram
+'  + saveMacroPlan(plan : MacroPlan) : void
+'  + saveTrainingPlan(plan : TrainingPlan) : void
+'  + saveWeighIn(weighIn : WeeklyWeighIn) : void
+'  + getWeighInHistory(userId : UUID) : List
+'  + saveWeightProgress(progress : WeightProgress) : void
+'  + getWeightProgress(userId : UUID) : WeightProgress
+'  + updateMacroPlan(plan : MacroPlan) : void
+'}
 
 User *-- UserProfile : has
 User *-- FitnessGoal : sets
 User *-- TrainingPreference : specifies
 User -- FitnessProgram : participates in
 
-FitnessGoal --> FitnessProgram : driveS
+FitnessGoal --> FitnessProgram : drives
 TrainingPreference --> FitnessProgram : shapes
 
 FitnessProgram *-- MacroPlan : contains
@@ -140,11 +222,25 @@ TrainingWeek *-- TrainingDay : contains
 TrainingDay *-- ProgramExercise : has
 ProgramExercise --> Exercise : refers to
 
-ExerciseCatalog ..> Exercise : fetches <API>
+ExerciseCatalog ..> Exercise : fetches <<API>>
 UserProfile ..> ExerciseCatalog : filters by experience and injuries
 
 WeeklyWeighIn --> WeightProgress : calculates
 WeightProgress ..> MacroAdjustment : if deviation
 MacroAdjustment --> MacroPlan : updates
+
+UserInputHandler ..> User : creates
+UserInputHandler ..> UserProfile : populates
+UserInputHandler ..> FitnessGoal : collects
+UserInputHandler ..> TrainingPreference : collects
+UserInputHandler ..> WeeklyWeighIn : records
+
+'DatabaseRepository ..> User : persists
+'DatabaseRepository ..> UserProfile : persists
+'DatabaseRepository ..> FitnessProgram : persists
+'DatabaseRepository ..> MacroPlan : persists
+'DatabaseRepository ..> TrainingPlan : persists
+'DatabaseRepository ..> WeeklyWeighIn : persists
+'DatabaseRepository ..> WeightProgress : persists
 
 @enduml
