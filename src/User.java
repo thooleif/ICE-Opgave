@@ -10,9 +10,6 @@ public class User {
     private String username;
     private String password;
 
-    private UserProfile profile;
-    private WeightTracker tracker;
-
     // Constructor til nye brugere
     public User(String username, String password) {
 

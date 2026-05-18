@@ -16,10 +16,10 @@ public class WeightTracker {
 
         System.out.println("\n=== Add Weekly Weigh-In ===");
 
-        double weightKg;
+        float weightKg;
         do{
             System.out.println("Enter weight (kg): ");
-            weightKg = scanner.nextDouble();
+            weightKg = scanner.nextFloat();
 
             if(weightKg <= 0){
                 System.out.println("Weight must be positive.");
@@ -69,7 +69,7 @@ public class WeightTracker {
             while((line = reader.readLine()) != null){
                 String[] parts = line.split(";");
                 LocalDate date = LocalDate.parse(parts[0]);
-                double weight = Double.parseDouble(parts[1]);
+                float weight = Float.parseFloat(parts[1]);
                 history.add(new WeeklyWeighIn(date, weight));
             }
         } catch (Exception e) {

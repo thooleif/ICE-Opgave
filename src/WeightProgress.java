@@ -1,8 +1,8 @@
 import java.util.List;
 
 public class WeightProgress {
-    private double totalChangeKg;
-    private double averageWeeklyChange;
+    private float totalChangeKg;
+    private float averageWeeklyChange;
 
     //Metode for at calculate progress taget fra WeeklyWeighIn History
     public void calculateProgress(List<WeeklyWeighIn> history){
@@ -12,8 +12,8 @@ public class WeightProgress {
             return;
         }
 
-        double startWeight = history.get(0).getWeightKG();
-        double endWeight = history.get(history.size() - 1).getWeightKG();
+        float startWeight = history.get(0).getWeightKG();
+        float endWeight = history.get(history.size() - 1).getWeightKG();
 
         totalChangeKg = endWeight - startWeight;
 

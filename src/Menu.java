@@ -257,7 +257,14 @@ public class Menu {
             if (choice == 1) {
                 login();
             } else if (choice == 2) {
-                register();
+                System.out.println("Enter username: ");
+                String username = scanner.nextLine();
+
+                System.out.println("Enter password: ");
+                String password = scanner.nextLine();
+
+                User user = new User(username, password);
+                user.register(users);
             } else if (choice == 3) {
                 System.out.println("Goodbye!");
 
@@ -323,36 +330,7 @@ public class Menu {
         }
     }
 
-    // Opretter en ny bruger og gemmer den i CSV-filen via User.saveUsers()
-    private void register() {
-        System.out.print("Choose a username: ");
 
-        String username = scanner.nextLine();
-
-
-        System.out.print("Choose a password: ");
-        String password = scanner.nextLine();
-
-
-
-        for (User user : users) {
-            if (user.getUsername().equalsIgnoreCase(username)) {
-                System.out.println("Username already taken, try another.");
-                return;
-            }
-
-
-        }
-
-        User newUser = new User(username, password);
-        users.add(newUser);
-
-        ArrayList<User> toSave = new ArrayList<>();
-        toSave.add(newUser);
-        User.saveUsers(toSave);
-
-        System.out.println("User created! You can now log in.");
-    }
 
 
     // Hovedmenuen som vises efter login - profil, mål og præferencer er altid oprettet på dette tidspunkt

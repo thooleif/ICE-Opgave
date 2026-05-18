@@ -4,10 +4,10 @@ import java.util.UUID;
 public class WeeklyWeighIn {
     private UUID weighInId;
     private LocalDate date;
-    private double weightKg;
+    private float weightKg;
 
     //Constructor for Weekly Weigh-In
-    public WeeklyWeighIn(LocalDate date, double weightKg){
+    public WeeklyWeighIn(LocalDate date, float weightKg){
         this.weighInId = UUID.randomUUID();
         this.date = date;
         this.weightKg = weightKg;
@@ -17,7 +17,7 @@ public class WeeklyWeighIn {
         return date;
     }
 
-    public double getWeightKG(){
+    public float getWeightKG(){
         return weightKg;
     }
 
