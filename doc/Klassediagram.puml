@@ -141,20 +141,28 @@ class ProgramExercise {
 
 class WeeklyWeighIn {
   + weighInId : UUID
-  + date : Date
-  + weightKg : Float
-  + weekNumber : Int
+  + LocalDate : date
+  + weightKg : double
   --
-  + logWeight(weight : Float) : void
-  + getWeighInHistory() : List
+  + getDate
+  + getWeightKg
 }
 
 class WeightProgress {
-  + totalChangeKg : Float
-  + averageChangePerWeek : Float
+  + totalChangeKg : double
+  + averageChangePerWeek : double
   --
   + calculateProgress() : void
   + getProgressReport() : String
+}
+
+class WeightTracker {
+  + history : ArrayList<WeeklyWeighIn>
+  --
+  + promptWeighIn : void
+  + saveWeighIn : void
+  + loadHistory : void
+  + getHistory : ArrayList
 }
 
 class MacroAdjustment {
@@ -225,7 +233,9 @@ ProgramExercise --> Exercise : refers to
 ExerciseCatalog ..> Exercise : fetches <<API>>
 UserProfile ..> ExerciseCatalog : filters by experience and injuries
 
+WeightTracker --* WeeklyWeighIn : contains
 WeeklyWeighIn --> WeightProgress : calculates
+WeightProgress --> WeightTracker : uses
 WeightProgress ..> MacroAdjustment : if deviation
 MacroAdjustment --> MacroPlan : updates
 

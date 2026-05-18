@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,6 +9,9 @@ public class User {
     private UUID id;
     private String username;
     private String password;
+
+    private UserProfile profile;
+    private WeightTracker tracker;
 
     // Constructor til nye brugere
     public User(String username, String password) {
@@ -26,14 +30,16 @@ public class User {
     }
 
     // CSV dokumentet hvor brugere bliver gemt
-    public static void saveUsers(ArrayList<User> users) {
+    public static void saveUsers(User user) {
 
         try (FileWriter writer = new FileWriter("Data/Users.csv", true)) {
 
-            for (User user : users) {
 
-                writer.write(user.getId() + ";" + user.getUsername() + ";" + user.getPassword() + "\n");
-            }
+                writer.write(
+                            user.getId() + ";" +
+                                user.getUsername() + ";" +
+                                user.getPassword() + "\n"
+                );
 
         } catch (IOException e) {
 
@@ -56,7 +62,9 @@ public class User {
 
 
         users.add(this);
-        saveUsers(users);
+        saveUsers(this);
+
+        createWeightFile();
 
         System.out.println("User registered successfully!");
     }
@@ -74,6 +82,28 @@ public class User {
         }
 
         return false;
+    }
+
+    //Laver Weight CSV fil for hver ny brugerID der bliver registreret
+    private void createWeightFile(){
+        String filename = "Data/" + id + "_weights.csv";
+
+        File file = new File(filename);
+
+        try{
+            if(file.createNewFile()){
+                FileWriter writer = new FileWriter(file);
+
+                writer.write("Date;WeightKg\n");
+                writer.close();
+
+                System.out.println("Weight file created: " + file.getName());
+            }else{
+                System.out.println("Weight file already exists");
+            }
+        }catch(IOException e){
+            System.out.println("Error creating weight file.");
+        }
     }
 
     public UUID getId() {
