@@ -54,6 +54,8 @@ public class WeightTracker {
 
     //Metode til at få History fra CSV fil
     public void loadHistory(User user){
+        history.clear();
+
         String filename = "Data/" + user.getId() + "_weights.csv";
 
         File file = new File(filename);
@@ -74,6 +76,17 @@ public class WeightTracker {
             }
         } catch (Exception e) {
             System.out.println("Error loading history.");
+        }
+    }
+
+    public void displayHistory(){
+        if(history.isEmpty()) {
+            System.out.println("No weigh-in found");
+            return;
+        }
+        System.out.println("\n=== Weight History ===");
+        for(WeeklyWeighIn weighIn : history){
+            System.out.println(weighIn.getDate() + " | " + weighIn.getWeightKG() + " kg");
         }
     }
 }
