@@ -54,7 +54,10 @@ class User {
     + register(users : ArrayList<User>) : void
     + {static} login(users, username, password) : boolean
     + {static} saveUsers(user : User) : void
-    - createWeightFile() : void
+    + addWeighIn() : void
+    + viewWeightHistory() : void
+    + viewProgress() : void
+    + createWeightFile() : void
     + getId() : UUID
     + getUsername() : String
     + getPassword() : String
@@ -127,9 +130,9 @@ class WeightTracker {
     - history : ArrayList<WeeklyWeighIn>
     + WeightTracker()
     + promptWeighIn(user : User) : void
-    - saveWeighIn(user, weighIn) : void
+    + saveWeighIn(user, weighIn) : void
     + loadHistory(user : User) : void
-    + getHistory() : ArrayList<WeeklyWeighIn>
+    + displayHistory() : void
 }
 
 class WeeklyWeighIn {
