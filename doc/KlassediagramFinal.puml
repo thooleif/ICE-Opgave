@@ -1,0 +1,182 @@
+@startuml FitnessApp
+
+'  ENUMS
+
+enum Gender {
+    MALE
+    FEMALE
+}
+
+enum ExperienceLevel {
+    BEGINNER
+    NOVICE
+    INTERMEDIATE
+    ADVANCED
+}
+
+enum GoalType {
+    BULK_UP
+    LOSE_WEIGHT
+    MAINTAIN
+    RECOMP
+}
+
+enum ProgramFocus {
+    CARDIO
+    POWERLIFTING
+    BODYBUILDING
+    GENERAL_LIFESTYLE
+}
+
+' CLASSES
+
+class Main {
+    + {static} main(args : String[]) : void
+}
+
+class Menu {
+    - scanner : Scanner
+    - users : ArrayList<User>
+    - currentUser : User
+    + start() : void
+    - login() : void
+    - register() : void
+    - profileMenu() : void
+    - loadUsers() : void
+}
+
+class User {
+    - id : UUID
+    - username : String
+    - password : String
+    + User(username, password)
+    + User(id, username, password)
+    + register(users : ArrayList<User>) : void
+    + {static} login(users, username, password) : boolean
+    + {static} saveUsers(user : User) : void
+    - createWeightFile() : void
+    + getId() : UUID
+    + getUsername() : String
+    + getPassword() : String
+}
+
+class UserProfile {
+    - age : int
+    - gender : Gender
+    - heightCm : float
+    - weightKg : float
+    - experienceLevel : ExperienceLevel
+    - injuryNotes : String
+    + UserProfile(age, gender, height, weight, exp, notes)
+    + updateStats(age, height, weight) : void
+    + calculateBMI() : float
+    + setExperienceLevel(lvl) : void
+    + addInjuryNote(note : String) : void
+}
+
+class FitnessGoal {
+    - {static} GOALS_FILE : String
+    - goalType : GoalType
+    - targetWeightKg : float
+    - startWeightKg : float
+    - deadlineDate : Date
+    - weeklyWeightChangeKg : float
+    + FitnessGoal(type, target, start, deadline, weekly)
+    + setGoal(...) : void
+    + updateGoal(...) : void
+    + calculateWeeklyTarget() : float
+    + isGoalReached(current : float) : boolean
+    + save(userId : UUID) : void
+    + update(userId : UUID) : void
+    + {static} load(userId : UUID) : FitnessGoal
+}
+
+class TrainingPreference {
+    - {static} PREFS_FILE : String
+    - wantsStrength : boolean
+    - wantsCardio : boolean
+    - programFocus : ProgramFocus
+    - trainingDaysPerWeek : int
+    - sessionDurationMin : int
+    + TrainingPreference(strength, cardio, focus, days, dur)
+    + setPreferences(...) : void
+    + updatePreferences(...) : void
+    + getRecommendedSplit() : String
+    + save(userId : UUID) : void
+    + update(userId : UUID) : void
+    + {static} load(userId : UUID) : TrainingPreference
+}
+
+class MacroPlan {
+    - {static} MACROS_FILE : String
+    - calorieGoal : int
+    - proteinGram : int
+    - carbohydrateGram : int
+    - fatGram : int
+    - calculationMethod : String
+    + MacroPlan(kcal, p, c, f, method)
+    + {static} calculateFor(profile, goal, prefs) : MacroPlan
+    + adjustCalories(amount : int) : void
+    + getMacroSplit() : String
+    + save(userId : UUID) : void
+    + update(userId : UUID) : void
+    + {static} load(userId : UUID) : MacroPlan
+}
+
+class WeightTracker {
+    - history : ArrayList<WeeklyWeighIn>
+    + WeightTracker()
+    + promptWeighIn(user : User) : void
+    - saveWeighIn(user, weighIn) : void
+    + loadHistory(user : User) : void
+    + getHistory() : ArrayList<WeeklyWeighIn>
+}
+
+class WeeklyWeighIn {
+    - weighInId : UUID
+    - date : LocalDate
+    - weightKg : float
+    + WeeklyWeighIn(date, weightKg)
+    + getDate() : LocalDate
+    + getWeightKG() : float
+}
+
+class WeightProgress {
+    - totalChangeKg : float
+    - averageWeeklyChange : float
+    + calculateProgress(history : List<WeeklyWeighIn>) : void
+    + getProgressReport() : String
+}
+
+' ==================== RELATIONS ====================
+
+Main ..> Menu : creates
+
+Menu *-- User : manages
+Menu ..> UserProfile : uses
+Menu ..> FitnessGoal : uses
+Menu ..> TrainingPreference : uses
+Menu ..> MacroPlan : uses
+Menu ..> WeightTracker : uses
+Menu ..> WeightProgress : uses
+
+User  --  UserProfile : has
+User  --  FitnessGoal : has
+User  --  TrainingPreference : has
+User  --  MacroPlan : has
+User  --  WeightTracker : has
+
+WeightTracker "1" *-- "*" WeeklyWeighIn : contains
+WeightProgress ..> WeeklyWeighIn : analyzes
+
+MacroPlan ..> UserProfile : reads
+MacroPlan ..> FitnessGoal : reads
+MacroPlan ..> TrainingPreference : reads
+
+' Enum links
+UserProfile --> Gender
+UserProfile --> ExperienceLevel
+FitnessGoal --> GoalType
+TrainingPreference --> ProgramFocus
+
+@enduml
