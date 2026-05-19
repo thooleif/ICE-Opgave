@@ -17,7 +17,7 @@ public class WeeklyWeighIn {
         return date;
     }
 
-    public float getWeightKG(){
+    public float getWeightKg(){
         return weightKg;
     }
 

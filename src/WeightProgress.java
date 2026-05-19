@@ -12,8 +12,8 @@ public class WeightProgress {
             return;
         }
 
-        float startWeight = history.get(0).getWeightKG();
-        float endWeight = history.get(history.size() - 1).getWeightKG();
+        float startWeight = history.get(0).getWeightKg();
+        float endWeight = history.get(history.size() - 1).getWeightKg();
 
         totalChangeKg = endWeight - startWeight;
 
