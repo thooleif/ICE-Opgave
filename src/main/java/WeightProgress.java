@@ -4,10 +4,8 @@ public class WeightProgress {
     private float totalChangeKg;
     private float averageWeeklyChange;
 
-    //Metode for at calculate progress taget fra WeeklyWeighIn History
-    public void calculateProgress(List<WeeklyWeighIn> history){
-
-        if(history.size() < 2){
+    public void calculateProgress(List<WeeklyWeighIn> history) {
+        if (history.size() < 2) {
             System.out.println("Not enough data.");
             return;
         }
@@ -16,12 +14,10 @@ public class WeightProgress {
         float endWeight = history.get(history.size() - 1).getWeightKg();
 
         totalChangeKg = endWeight - startWeight;
-
         averageWeeklyChange = totalChangeKg / (history.size() - 1);
     }
 
-    //Metode til at få en Progress Report
-    public String getProgressReport(){
+    public String getProgressReport() {
         return """
                 ===== Progress =====
                 Total Change: %.2f kg
