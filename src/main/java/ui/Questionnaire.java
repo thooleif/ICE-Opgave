@@ -136,10 +136,23 @@ public class Questionnaire {
     }
 
     public String askTrainingStyle() {
-        System.out.println("Hvordan vil du primært træne?");
+        System.out.println("Hvordan vil du primært træne? (vælg én)");
         System.out.println("  1. Bodybuilder — volumen, hypertrofi, isolation");
         System.out.println("  2. Atlet — compounds, power, funktionel styrke");
-        return askChoice("", new String[]{"Bodybuilder", "Atlet"});
+
+        while (true) {
+            System.out.print("Vælg (1-2): ");
+            String raw = scanner.nextLine().trim();
+            try {
+                return switch (Integer.parseInt(raw)) {
+                    case 1 -> "Bodybuilder";
+                    case 2 -> "Atlet";
+                    default -> throw new NumberFormatException();
+                };
+            } catch (NumberFormatException e) {
+                System.out.println("Ugyldigt valg — vælg 1 eller 2.");
+            }
+        }
     }
 
     public boolean askYesNo(String prompt, boolean defaultValue) {
