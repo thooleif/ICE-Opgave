@@ -234,7 +234,7 @@ public class FoodRecommender {
             System.out.println("No food found matching your filters.");
         } else {
             System.out.printf("%-45s | %s | %s | %s%n",
-                    "Food", "Kcal", "Protein", "Group");
+                    "Food", "Kcal/100g", "Protein/100g", "Group");
             System.out.println("-".repeat(90));
             for (String food : results) {
                 System.out.println(food);
