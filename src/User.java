@@ -9,6 +9,7 @@ public class User {
     private UUID id;
     private String username;
     private String password;
+    private WeightTracker tracker;
 
     // Constructor til nye brugere
     public User(String username, String password) {
@@ -16,6 +17,7 @@ public class User {
         this.id = UUID.randomUUID();
         this.username = username;
         this.password = password;
+        this.tracker = new WeightTracker();
     }
 
     // Constructor til brugere læst fra fil
@@ -81,6 +83,24 @@ public class User {
         return false;
     }
 
+    public void addWeighIn(){
+        tracker.promptWeighIn(this);
+    }
+
+    public void viewWeightHistory(){
+        tracker.loadHistory(this);
+        tracker.displayHistory();
+    }
+
+    public void viewProgress() {
+
+        WeightProgress progress = new WeightProgress();
+
+        progress.calculateProgress(tracker.getHistory());
+
+        System.out.println(progress.getProgressReport());
+    }
+
     //Laver Weight CSV fil for hver ny brugerID der bliver registreret
     private void createWeightFile(){
         String filename = "Data/" + id + "_weights.csv";
@@ -113,6 +133,10 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public WeightTracker getTracker() {
+        return tracker;
     }
 
     @Override

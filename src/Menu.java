@@ -285,8 +285,6 @@ public class Menu {
         System.out.print("Username: ");
         String username = scanner.nextLine();
 
-
-
         System.out.print("Password: ");
         String password = scanner.nextLine();
 
@@ -330,9 +328,6 @@ public class Menu {
         }
     }
 
-
-
-
     // Hovedmenuen som vises efter login - profil, mål og præferencer er altid oprettet på dette tidspunkt
     // fordi login() tvinger brugeren til at lave dem hvis de ikke findes
     private void mainMenu() {
@@ -341,7 +336,6 @@ public class Menu {
 
             System.out.println("\n=== Main Menu ===");
 
-
             System.out.println("1. View profile");
             System.out.println("2. Update stats");
             System.out.println("3. View fitness goal");
@@ -349,13 +343,15 @@ public class Menu {
             System.out.println("5. View training preferences");
             System.out.println("6. Update training preferences");
             System.out.println("7. View / generate macro plan");
-            System.out.println("8. Logout");
+            System.out.println("8. Add weekly weigh-in");
+            System.out.println("9. View weigh-in history");
+            System.out.println("10. View progress and progress report");
+            System.out.println("11. Logout");
             System.out.print("Choose: ");
 
             int choice = readInt();
             if (choice == 1) {
                 viewProfile();
-
 
             } else if (choice == 2) {
                 updateStats();
@@ -370,6 +366,13 @@ public class Menu {
             } else if (choice == 7) {
                 macroPlanMenu();
             } else if (choice == 8) {
+                loggedInUser.addWeighIn();
+            } else if (choice == 9) {
+                loggedInUser.viewProgress();
+            } else if (choice == 10) {
+                loggedInUser.viewWeightHistory();
+                System.out.println("Wight history loaded");
+            } else if (choice == 11) {
                 loggedInUser = null;
                 userProfile = null;
                 fitnessGoal = null;
@@ -380,11 +383,8 @@ public class Menu {
             } else {
                 System.out.println("Invalid choice, try again.");
             }
-
-
         }
     }
-
 
     // Samler alle profiloplysninger fra brugeren og opretter et UserProfile-objekt
     private void createProfile() {
@@ -399,8 +399,6 @@ public class Menu {
         if (genderChoice == 1) {
             gender = UserProfile.Gender.MALE;
         } else {
-
-
             gender = UserProfile.Gender.FEMALE;
         }
 
@@ -425,8 +423,6 @@ public class Menu {
 
         System.out.print("Injury notes (leave blank if none): ");
         String injuryNotes = scanner.nextLine();
-
-
 
         userProfile = new UserProfile(age, gender, height, weight, level, injuryNotes);
         saveProfile(loggedInUser.getId());
@@ -499,10 +495,7 @@ public class Menu {
                 System.out.println("Invalid choice, try again.");
             }
         }
-
-
     }
-
 
     // Oprettelse af mål - kaldes første gang efter profil, eller hvis brugeren ikke har et endnu
     private void createFitnessGoal() {
@@ -670,10 +663,7 @@ public class Menu {
         }
     }
 
-
-
     // Training Preference flow - kalder bare TrainingPreference.save/update
-
 
     // Spørger om alle træningspræferencer og laver objektet
     private void createTrainingPreference() {
@@ -890,11 +880,7 @@ public class Menu {
                 return user;
             }
         }
-
-
         return null;
-
-
     }
 
     // Bruges til menuvalg - returnerer -1 hvis input ikke er et tal så if/else rammer default
