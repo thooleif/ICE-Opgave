@@ -46,7 +46,7 @@ public class WeightTracker {
         String filename = "Data/" + user.getId() + "_weights.csv";
 
         try(FileWriter writer = new FileWriter(filename, true)){
-            writer.write(weighIn.getDate() + ";" + weighIn.getWeightKG() + "\n");
+            writer.write(weighIn.getDate() + ";" + weighIn.getWeightKg() + "\n");
         } catch (IOException e) {
             System.out.println("Error saving weigh-in.");
         }
@@ -86,7 +86,7 @@ public class WeightTracker {
         }
         System.out.println("\n=== Weight History ===");
         for(WeeklyWeighIn weighIn : history){
-            System.out.println(weighIn.getDate() + " | " + weighIn.getWeightKG() + " kg");
+            System.out.println(weighIn.getDate() + " | " + weighIn.getWeightKg() + " kg");
         }
     }
 }
