@@ -29,6 +29,8 @@ public class FridaImporter {
 
     // ───────────────────────────────────────────────────────────────────────
     public static void main(String[] args) throws Exception {
+
+
         String xlsxPath = args.length > 0 ? args[0] : DEFAULT_XLSX;
         String dbPath   = args.length > 1 ? args[1] : DEFAULT_DB;
 
