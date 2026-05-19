@@ -4,7 +4,7 @@ Systemet er en personlig fitness app, der hjælper brugeren med at sætte et væ
 
 ## Domæne
 
-De centrale entiteter i systemet er brugeren, brugerens profil med fysiske data, et fitnessmål, en træningspræference, en makroplan, samt en historik af ugentlige vejninger. En bruger ejer præcis én profil, ét mål, én træningspræference og én makroplan ad gangen, mens vejningerne samles op over tid og udgør grundlaget for at vurdere fremgang. Makroplanen er afhængig af de tre andre, fordi den beregnes ud fra fysiske data, valgt mål og hvor meget brugeren træner.
+De centrale entiteter i systemet er brugeren, brugerens profil med fysiske data, et fitnessmål, en træningspræference, en makroplan, samt en historik af ugentlige vejninger. En bruger ejer præcis en profil, et mål, en træningspræference og en makroplan ad gangen, mens vejningerne samles op over tid og udgør grundlaget for at vurdere fremgang. Makroplanen er afhængig af de tre andre, fordi den beregnes ud fra fysiske data, valgt mål og hvor meget brugeren træner.
 
 ## Bruger og profil
 
