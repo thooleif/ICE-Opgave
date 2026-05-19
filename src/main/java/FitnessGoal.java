@@ -4,7 +4,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class FitnessGoal {
@@ -29,6 +32,7 @@ public class FitnessGoal {
     private float startWeightKg;
     private Date deadlineDate;
     private float weeklyWeightChangeKg;
+    private List<String> physicalGoals = new ArrayList<>();
 
     // Constructor
     public FitnessGoal(GoalType goalType, float targetWeightKg, float startWeightKg, Date deadlineDate, float weeklyWeightChangeKg) {
@@ -38,6 +42,12 @@ public class FitnessGoal {
         this.startWeightKg = startWeightKg;
         this.deadlineDate = deadlineDate;
         this.weeklyWeightChangeKg = weeklyWeightChangeKg;
+    }
+
+    public FitnessGoal(GoalType goalType, float targetWeightKg, float startWeightKg, Date deadlineDate,
+                       float weeklyWeightChangeKg, List<String> physicalGoals) {
+        this(goalType, targetWeightKg, startWeightKg, deadlineDate, weeklyWeightChangeKg);
+        this.physicalGoals = physicalGoals != null ? new ArrayList<>(physicalGoals) : new ArrayList<>();
     }
 
     // Set goal (initial setup)
@@ -107,18 +117,27 @@ public class FitnessGoal {
         return weeklyWeightChangeKg;
     }
 
+    public List<String> getPhysicalGoals() {
+        return physicalGoals;
+    }
+
+    public void setPhysicalGoals(List<String> physicalGoals) {
+        this.physicalGoals = physicalGoals != null ? new ArrayList<>(physicalGoals) : new ArrayList<>();
+    }
 
     // CSV - alle metoder til at gemme og indlæse mål fra fil
     // Ligger i klassen så Menu ikke skal bekymre sig om filformat
 
     // Lille helper der laver én CSV-linje for dette mål
     private String toCsvLine(UUID userId) {
+        String physical = physicalGoals.isEmpty() ? "" : String.join("|", physicalGoals);
         return userId + ";" +
                 goalType + ";" +
                 targetWeightKg + ";" +
                 startWeightKg + ";" +
                 DATE_FORMAT.format(deadlineDate) + ";" +
-                weeklyWeightChangeKg + "\n";
+                weeklyWeightChangeKg + ";" +
+                physical + "\n";
     }
 
     // Tjekker om der allerede ligger et mål for brugeren - bruges for at undgå duplikater
@@ -203,7 +222,12 @@ public class FitnessGoal {
                     Date deadline = DATE_FORMAT.parse(parts[4]);
                     float weekly = Float.parseFloat(parts[5]);
 
-                    return new FitnessGoal(type, target, start, deadline, weekly);
+                    List<String> physical = new ArrayList<>();
+                    if (parts.length >= 7 && !parts[6].isBlank()) {
+                        physical.addAll(Arrays.asList(parts[6].split("\\|")));
+                    }
+
+                    return new FitnessGoal(type, target, start, deadline, weekly, physical);
                 }
             }
         } catch (IOException | ParseException e) {
@@ -222,6 +246,7 @@ public class FitnessGoal {
                 ", startWeightKg=" + startWeightKg +
                 ", deadlineDate=" + deadlineDate +
                 ", weeklyWeightChangeKg=" + weeklyWeightChangeKg +
+                ", physicalGoals=" + physicalGoals +
                 '}';
     }
 }
