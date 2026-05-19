@@ -169,7 +169,7 @@ User  --  TrainingPreference : has
 User  --  MacroPlan : has
 User  --  WeightTracker : has
 
-WeightTracker "1" *-- "*" WeeklyWeighIn : contains
+WeightTracker *-- WeeklyWeighIn : contains
 WeightProgress ..> WeeklyWeighIn : analyzes
 
 MacroPlan ..> UserProfile : reads

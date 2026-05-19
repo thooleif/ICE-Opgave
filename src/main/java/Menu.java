@@ -579,7 +579,7 @@ public class Menu {
         if (userProfile != null) {
             boolean reached = fitnessGoal.isGoalReached(userProfile.getWeightKg());
             if (reached) {
-                System.out.println("Status: Goal reached! Godt gået!");
+                System.out.println("Status: Goal reached!");
             } else {
                 System.out.println("Status: Not there yet - keep going");
             }
@@ -672,10 +672,10 @@ public class Menu {
     // Lille helper der spørger om goal type - bruges flere steder
     private FitnessGoal.GoalType readGoalType() {
         System.out.println("Goal type:");
-        System.out.println("  1 = Bulk up (tage på) — flere kalorier, fokus på styrke og muskelvækst");
-        System.out.println("  2 = Lose weight (tabe sig) — deficit, bevar muskel med protein og styrke");
-        System.out.println("  3 = Maintain (holde vægten) — stabil vægt, balanceret træning");
-        System.out.println("  4 = Recomp (tabe fedt + bygge muskel) — langsom vægtændring, mix af styrke og volumen");
+        System.out.println("  1 = Bulk up (gain weight) — more calories, focus on strength");
+        System.out.println("  2 = Lose weight — deficit, keep muscles lose fat");
+        System.out.println("  3 = Maintain (keep weight) — stable weight, gain strength");
+        System.out.println("  4 = Recomp (lose fat, gain muscle) — slow gain smart after a heavy cut, mix of strength and volume");
         System.out.print("Choose: ");
         int c = readInt();
 
@@ -733,10 +733,10 @@ public class Menu {
         }
 
         System.out.println("\n" + trainingPreference);
-        System.out.println("Styrke: " + (trainingPreference.getWantsStrength() ? "ja" : "nej")
-                + " | Cardio: " + (trainingPreference.getWantsCardio() ? "ja" : "nej"));
-        System.out.println("Programfokus (generator): " + trainingPreference.resolveGeneratorFocus());
-        System.out.println("Anbefalet split: " + trainingPreference.getRecommendedSplit());
+        System.out.println("Strength: " + (trainingPreference.getWantsStrength() ? "yes" : "no")
+                + " | Cardio: " + (trainingPreference.getWantsCardio() ? "yes" : "no"));
+        System.out.println("Programfocus (generator): " + trainingPreference.resolveGeneratorFocus());
+        System.out.println("Recomended split: " + trainingPreference.getRecommendedSplit());
     }
 
     // Update menu for preferences - samme struktur som updateFitnessGoal
@@ -767,7 +767,7 @@ public class Menu {
                 trainingPreference.setFocus(questionnaire.askFocus());
                 trainingPreference.update(loggedInUser.getId());
                 System.out.println("Training focus updated.");
-                System.out.println("Anbefalet split: " + trainingPreference.getRecommendedSplit());
+                System.out.println("Recomended split " + trainingPreference.getRecommendedSplit());
             } else if (choice == 2) {
                 trainingPreference.setWantsStrength(!trainingPreference.getWantsStrength());
                 trainingPreference.update(loggedInUser.getId());
@@ -820,7 +820,7 @@ public class Menu {
 
             if (savedTrainingProgram != null && !savedTrainingProgram.getDays().isEmpty()) {
                 System.out.println(savedTrainingProgram.getOverview());
-                System.out.println("Anbefalet split: " + trainingPreference.getRecommendedSplit());
+                System.out.println("Recomended split: " + trainingPreference.getRecommendedSplit());
             } else {
                 System.out.println("No saved training program yet.");
             }

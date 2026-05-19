@@ -1,30 +1,33 @@
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class WeightTracker {
-    private ArrayList<WeeklyWeighIn> history;
+    private final ArrayList<WeeklyWeighIn> history;
 
-    public WeightTracker(){
+    public WeightTracker() {
         history = new ArrayList<>();
     }
 
-    //Metode til at tilføje Weigh-In og et loop for at sikre user ikke skriver negativt
-    public void promptWeighIn(User user){
+    public void promptWeighIn(User user) {
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("\n=== Add Weekly Weigh-In ===");
 
         float weightKg;
-        do{
+        do {
             System.out.println("Enter weight (kg): ");
             weightKg = scanner.nextFloat();
 
-            if(weightKg <= 0){
+            if (weightKg <= 0) {
                 System.out.println("Weight must be positive.");
             }
-        }while(weightKg <= 0);
+        } while (weightKg <= 0);
         scanner.nextLine();
 
         LocalDate date = LocalDate.now();
@@ -40,38 +43,43 @@ public class WeightTracker {
         return history;
     }
 
-    //Metode der gemmer Weigh-In i CSV fil der passer til userID
-    private void saveWeighIn(User user, WeeklyWeighIn weighIn){
-
+    private void saveWeighIn(User user, WeeklyWeighIn weighIn) {
         String filename = "Data/" + user.getId() + "_weights.csv";
 
-        try(FileWriter writer = new FileWriter(filename, true)){
-            writer.write(weighIn.getDate() + ";" + weighIn.getWeightKG() + "\n");
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            writer.write(weighIn.getDate() + ";" + weighIn.getWeightKg() + "\n");
         } catch (IOException e) {
             System.out.println("Error saving weigh-in.");
         }
     }
 
-    //Metode til at få History fra CSV fil
-    public void loadHistory(User user){
+    public void loadHistory(User user) {
         history.clear();
 
         String filename = "Data/" + user.getId() + "_weights.csv";
-
         File file = new File(filename);
 
-        if(!file.exists()){
+        if (!file.exists()) {
             return;
         }
 
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
+            boolean first = true;
 
-            while((line = reader.readLine()) != null){
+            while ((line = reader.readLine()) != null) {
+                if (first) {
+                    first = false;
+                    if (line.toLowerCase().startsWith("date")) {
+                        continue;
+                    }
+                }
                 String[] parts = line.split(";");
-                LocalDate date = LocalDate.parse(parts[0]);
-                float weight = Float.parseFloat(parts[1]);
+                if (parts.length < 2) {
+                    continue;
+                }
+                LocalDate date = LocalDate.parse(parts[0].trim());
+                float weight = Float.parseFloat(parts[1].trim());
                 history.add(new WeeklyWeighIn(date, weight));
             }
         } catch (Exception e) {
@@ -79,14 +87,14 @@ public class WeightTracker {
         }
     }
 
-    public void displayHistory(){
-        if(history.isEmpty()) {
+    public void displayHistory() {
+        if (history.isEmpty()) {
             System.out.println("No weigh-in found");
             return;
         }
         System.out.println("\n=== Weight History ===");
-        for(WeeklyWeighIn weighIn : history){
-            System.out.println(weighIn.getDate() + " | " + weighIn.getWeightKG() + " kg");
+        for (WeeklyWeighIn weighIn : history) {
+            System.out.println(weighIn.getDate() + " | " + weighIn.getWeightKg() + " kg");
         }
     }
 }

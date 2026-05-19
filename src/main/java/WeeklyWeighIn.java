@@ -6,23 +6,22 @@ public class WeeklyWeighIn {
     private LocalDate date;
     private float weightKg;
 
-    //Constructor for Weekly Weigh-In
-    public WeeklyWeighIn(LocalDate date, float weightKg){
+    public WeeklyWeighIn(LocalDate date, float weightKg) {
         this.weighInId = UUID.randomUUID();
         this.date = date;
         this.weightKg = weightKg;
-       }
+    }
 
-    public LocalDate getDate(){
+    public LocalDate getDate() {
         return date;
     }
 
-    public float getWeightKg(){
+    public float getWeightKg() {
         return weightKg;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return date + ";" + weightKg;
     }
 }

@@ -22,10 +22,10 @@ public class User {
 
     // Constructor til brugere læst fra fil
     public User(UUID id, String username, String password) {
-
         this.id = id;
         this.username = username;
         this.password = password;
+        this.tracker = new WeightTracker();
     }
 
     // CSV dokumentet hvor brugere bliver gemt
