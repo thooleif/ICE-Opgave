@@ -8,11 +8,11 @@
       <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/fitness.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="frida.db" uuid="1d947f12-ebcb-41d1-92e0-14addaada43a">
+    <data-source source="LOCAL" name="frida.db" uuid="f9f09248-ec85-4850-a842-cd95f84e887e">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/Data/frida.db</jdbc-url>
+      <jdbc-url>jdbc:sqlite:data/frida.db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

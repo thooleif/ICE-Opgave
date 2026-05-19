@@ -1,3 +1,4 @@
+import foodRecommender.FoodRecommender;
 import ui.Questionnaire;
 import ui.TrainingPreferenceInput;
 
@@ -372,7 +373,8 @@ public class Menu {
             System.out.println("10. Add weekly weigh-in");
             System.out.println("11. View weigh-in history");
             System.out.println("12. View progress and progress report");
-            System.out.println("13. Logout");
+            System.out.println("13. Use Foodrecommender");
+            System.out.println("14. Logout");
             System.out.print("Choose: ");
 
             int choice = readInt();
@@ -402,7 +404,9 @@ public class Menu {
                 System.out.println("Weight history loaded");
             } else if (choice == 12) {
                 loggedInUser.viewProgress();
-            } else if (choice == 13) {
+            } else if (choice == 13){
+                FoodRecommender.launchFoodRecommender();
+            } else if (choice == 14) {
                 loggedInUser = null;
                 userProfile = null;
                 fitnessGoal = null;
