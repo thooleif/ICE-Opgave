@@ -1,0 +1,280 @@
+@startuml FitnessDomainModel
+title Fitness Program — Domænemodel (v2)
+skinparam classAttributeIconSize 0
+
+' ===================== KONTO & SIKKERHED =====================
+class Bruger {
+  + brugerId : UUID
+  + brugernavn : String {unik}
+  + email : String
+  + adgangskodeHash : String
+  + rolle : Enum {Bruger, Admin}
+  + oprettetDato : DateTime
+  + sidsteLogin : DateTime
+  + aktiv : Boolean
+  --
+  + verificerAdgangskode()
+  + eksporterMineData()
+  + slet/anonymiser()
+}
+
+class Session <<Teknisk>> {
+  + tokenId : UUID
+  + udstedtAt : DateTime
+  + udløberAt : DateTime
+  + tilbagekaldt : Boolean
+}
+
+' ===================== PROFIL, MÅL, PRÆFERENCER =====================
+class BrugerProfil {
+  + alder : Int
+  + køn : Enum {Mand, Kvinde, Andet}
+  + højdeCm : Float
+  + vægtKg : Float
+  + aktivitetsNiveau : Enum {Stillesiddende, Let, Moderat, Høj, MegetHøj}
+  + erfaringsNiveau : Enum {Begynder, Øvet, Avanceret}
+  + skaderNotes : String
+  + brugsOmfang : Enum {KunMakro, KunWorkoutLog, EgetProgram, FuldPakke}
+  + /bmi : Float
+  --
+  + beregnBMI()
+  + beregnBMR()
+}
+
+class FitnessMål {
+  + målId : UUID
+  + målType : Enum {TagePå, TabeSig, Vedligeholde, Rekomp}
+  + startVægtKg : Float
+  + målvægtKg : Float
+  + deadlineDato : Date
+  + ugentligVægtÆndringKg : Float
+  + status : Enum {Aktiv, Nået, Opgivet, Nulstillet}
+  --
+  + vurderOmNået()
+  + nulstil()
+}
+
+class FysiskDelmål {
+  + delmålId : UUID
+  + beskrivelse : String
+  + målværdi : Float
+  + enhed : String
+  + opnået : Boolean
+}
+
+class TræningsPræference {
+  + ønskerStyrke : Boolean
+  + ønskerCardio : Boolean
+  + ønskerHIIT : Boolean
+  + programFokus : Enum {AlmenLivsstil, Bodybuilding, SpecielSport, Andet}
+  + sportSpecifikation : String
+  + træningsDagePerUge : Int
+  + sessionVarighedMin : Int
+  + /anbefaletSplit : String
+  --
+  + anbefalSplit()
+}
+
+' ===================== PROGRAM =====================
+class FitnessProgram {
+  + programId : UUID
+  + oprettetDato : Date
+  + status : Enum {Aktiv, Afsluttet, Pauseret}
+  + varighedUger : Int
+  --
+  + generer()
+  + regenerer()
+}
+
+class MacroPlan {
+  + kalorieMål : Int
+  + proteinGram : Int
+  + kulhydratGram : Int
+  + fedtGram : Int
+  + /proteinPct : Float
+  + /kulhydratPct : Float
+  + /fedtPct : Float
+  + beregningsMetode : String
+  + justeringsFaktor : Float
+  + manueltJusteret : Boolean
+  --
+  + beregnMifflinStJeor()
+  + justerKalorierManuelt()
+}
+
+class MacroJustering {
+  + justeringsDato : Date
+  + gamleKalorier : Int
+  + nyeKalorier : Int
+  + årsag : String
+  + anbefaling : String
+}
+
+class KosttilskudsAnbefaling {
+  + anbefalingsId : UUID
+  + oprettetDato : Date
+  + begrundelse : String
+  --
+  + genererAnbefaling()
+}
+
+class Kosttilskud {
+  + kosttilskudId : UUID
+  + navn : String
+  + formål : String
+  + doseringsForslag : String
+  + relevantFor : String[]
+}
+
+class TræningsPlan {
+  + planId : UUID
+  + navn : String
+  + ugentligStruktur : String
+  + skadesHensyn : String[]
+}
+
+class TræningsUge {
+  + ugeNummer : Int
+  + startDato : Date
+  + slutDato : Date
+  + status : Enum {Planlagt, Aktiv, Gennemført}
+}
+
+class TræningsDag {
+  + dagNummer : Int
+  + dagNavn : String
+  + fokus : Enum {Push, Pull, Ben, FullBody, Cardio, Hvile}
+  + estimeretVarighed : Int
+}
+
+class ProgramØvelse {
+  + programØvelseId : UUID
+  + rækkefølge : Int
+  + sæt : Int
+  + reps : String
+  + foreslåetStartVægtKg : Float
+  + hviletidSek : Int
+  + progressionNote : String
+  --
+  + foreslåStartVægt()
+}
+
+class Øvelse {
+  + øvelseId : UUID
+  + navn : String
+  + muskelgruppe : String[]
+  + udstyr : String
+  + erfaringsNiveau : Enum
+  + skadevenlig : Boolean
+  + videoUrl : String
+}
+
+class ØvelseKatalog <<Service/ExternalAPI>> {
+  + hentØvelserEfterNiveau()
+  + hentØvelserEfterMuskelgruppe()
+  + filtrerEfterSkader()
+  + hentAlternativeØvelser()
+  + opret/opdater/sletØvelse() <<Admin>>
+}
+
+' ===================== WORKOUT-GENNEMFØRSEL =====================
+class TræningsPas {
+  + passId : UUID
+  + dato : Date
+  + startTid : DateTime
+  + slutTid : DateTime
+  + status : Enum {IGang, Gennemført, Annulleret}
+  + noter : String
+  --
+  + startFraProgram()
+  + gem()
+  + annuller()
+}
+
+class SætLog {
+  + sætLogId : UUID
+  + sætNummer : Int
+  + reps : Int
+  + vægtKg : Float
+  + rpe : Float
+  + tidsstempel : DateTime
+  + erPB : Boolean
+}
+
+class PersonligRekord {
+  + pbId : UUID
+  + vægtKg : Float
+  + reps : Int
+  + /estimeret1RM : Float
+  + opnåetDato : Date
+  --
+  + beregn1RM()
+  + opdaterHvisSlået()
+}
+
+' ===================== VÆGT & FREMSKRIDT =====================
+class UgentligWeighIn {
+  + weighInId : UUID
+  + dato : Date
+  + vægtKg : Float
+  + ugeNummer : Int
+  + noter : String
+}
+
+class VægtFremskridt {
+  + totalÆndringKg : Float
+  + procentFærdig : Float
+  + gennemsnitsÆndringPerUge : Float
+  + estimeretFærdigDato : Date
+  + påRetteSpor : Boolean
+}
+
+' ===================== RELATIONER =====================
+Bruger -- Session : autentificeres via
+Bruger *-- BrugerProfil : har
+Bruger *-- FitnessMål : sætter
+Bruger *-- TræningsPræference : specificerer
+Bruger -- FitnessProgram : deltager i
+Bruger -- TræningsPas : gennemfører
+Bruger -- PersonligRekord : har
+Bruger ..> Øvelse : vedligeholder <<kun Admin>>
+
+FitnessMål *-- FysiskDelmål : indeholder
+FitnessMål --> FitnessProgram : driver
+TræningsPræference --> FitnessProgram : former
+BrugerProfil --> MacroPlan : input til beregning
+
+FitnessProgram *-- MacroPlan : indeholder
+FitnessProgram *-- TræningsPlan : indeholder
+FitnessProgram *-- UgentligWeighIn : sporer
+FitnessProgram *-- KosttilskudsAnbefaling : indeholder
+KosttilskudsAnbefaling --> Kosttilskud : anbefaler
+
+TræningsPlan *-- TræningsUge : består af
+TræningsUge *-- TræningsDag : indeholder
+TræningsDag *-- ProgramØvelse : har
+ProgramØvelse --> Øvelse : refererer til
+
+ØvelseKatalog ..> Øvelse : henter/administrerer
+BrugerProfil ..> ØvelseKatalog : filtrerer på niveau og skader
+
+TræningsPas --> TræningsDag : udføres fra
+TræningsPas *-- SætLog : logger
+SætLog --> ProgramØvelse : hører til
+SætLog ..> PersonligRekord : opdaterer hvis slået
+PersonligRekord --> Øvelse : gælder for
+
+UgentligWeighIn --> VægtFremskridt : beregner
+VægtFremskridt ..> MacroJustering : hvis afvigelse
+MacroJustering --> MacroPlan : opdaterer
+
+' ===== VALGFRI: madlogging =====
+' class Måltid { + måltidId : UUID  + dato : Date  + type : Enum {Morgen, Frokost, Aften, Snack} }
+' class Fødevareindtag { + mængdeGram : Float  + /kalorier : Int }
+' class Fødevare { + navn : String  + kcalPer100g : Float  + proteinPer100g : Float }
+' Bruger *-- Måltid
+' Måltid *-- Fødevareindtag
+' Fødevareindtag --> Fødevare
+' Måltid ..> MacroPlan : sammenlignes med dagsmål
+
+@enduml

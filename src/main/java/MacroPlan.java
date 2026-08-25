@@ -39,9 +39,7 @@ public class MacroPlan {
 
     // Static factory metode - laver en frisk plan baseret på brugerens data
     // Static fordi vi ikke har et objekt at kalde det på endnu - vi laver et nyt et
-    public static MacroPlan calculateFor(UserProfile profile,
-                                         FitnessGoal goal,
-                                         TrainingPreference prefs) {
+    public static MacroPlan calculateFor(UserProfile profile, FitnessGoal goal, TrainingPreference prefs) {
 
         // Trin 1: BMR med Mifflin-St Jeor (mest præcise formel ifølge 2026 forskning)
         // Mænd:   BMR = 10*kg + 6.25*cm - 5*alder + 5
